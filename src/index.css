@@ -2,16 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. Premium dark theme with neon accents.
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 240 20% 99%;
+    --background: 0 0% 100%;
     --foreground: 240 10% 10%;
 
-    --card: 0 0% 100%;
+    --card: 0 0% 99%;
     --card-foreground: 240 10% 10%;
 
     --popover: 0 0% 100%;
@@ -20,7 +20,7 @@ All colors MUST be HSL.
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
     
-    --primary-glow: 250 100% 75%;
+    --primary-glow: 262 83% 68%;
 
     --secondary: 240 5% 96%;
     --secondary-foreground: 240 10% 10%;
@@ -28,7 +28,7 @@ All colors MUST be HSL.
     --muted: 240 5% 96%;
     --muted-foreground: 240 4% 46%;
 
-    --accent: 33 100% 60%;
+    --accent: 33 100% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -41,70 +41,64 @@ All colors MUST be HSL.
     --radius: 0.75rem;
     
     --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(220 90% 56%));
-    --gradient-subtle: linear-gradient(180deg, hsl(240 20% 99%), hsl(240 10% 96%));
-    --shadow-elegant: 0 10px 40px -10px hsl(262 83% 58% / 0.2);
-    --shadow-glow: 0 0 60px hsl(250 100% 75% / 0.3);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(240 10% 98%));
+    --shadow-elegant: 0 10px 40px -10px hsl(262 83% 58% / 0.15);
+    --shadow-glow: 0 0 60px hsl(262 83% 58% / 0.2);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 240 10% 8%;
-    --foreground: 240 5% 96%;
+    --background: 240 10% 4%;
+    --foreground: 0 0% 95%;
 
-    --card: 240 8% 12%;
-    --card-foreground: 240 5% 96%;
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 240 8% 12%;
-    --popover-foreground: 240 5% 96%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 95%;
 
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
     
-    --primary-glow: 250 100% 75%;
+    --primary-glow: 262 100% 70%;
 
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 240 5% 96%;
+    --secondary: 240 5% 12%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 64%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 55%;
 
-    --accent: 33 100% 60%;
+    --accent: 33 100% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
     --ring: 262 83% 58%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(220 90% 56%));
-    --gradient-subtle: linear-gradient(180deg, hsl(240 10% 8%), hsl(240 8% 12%));
-    --shadow-elegant: 0 10px 40px -10px hsl(262 83% 58% / 0.4);
-    --shadow-glow: 0 0 60px hsl(250 100% 75% / 0.5);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 90% 60%));
+    --gradient-subtle: linear-gradient(180deg, hsl(240 10% 4%), hsl(240 10% 8%));
+    --shadow-elegant: 0 10px 40px -10px hsl(262 83% 58% / 0.3);
+    --shadow-glow: 0 0 80px hsl(262 100% 70% / 0.3);
+    
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 240 5% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 240 5% 15%;
+    --sidebar-ring: 262 83% 58%;
   }
 }
 
@@ -114,6 +108,126 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+@layer utilities {
+  /* Glassmorphism effect */
+  .glass {
+    @apply backdrop-blur-xl bg-background/80;
+  }
+
+  /* Neon glow effect */
+  .neon-glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5),
+                0 0 40px hsl(var(--primary) / 0.3),
+                0 0 60px hsl(var(--primary) / 0.1);
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+    background-size: 200% auto;
+  }
+
+  /* Animated gradient */
+  .animate-gradient {
+    animation: gradient 3s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scale in animation */
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Slide up animation */
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+
+  /* Card hover glow */
+  .card-glow {
+    @apply transition-shadow duration-300;
+  }
+
+  .card-glow:hover {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.15);
   }
 }
