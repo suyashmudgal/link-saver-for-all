@@ -18,11 +18,18 @@ const itemSchema = z.object({
   thumbnailUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
 
-interface AddItemDialogProps {
-  onItemAdded: () => void;
+interface Folder {
+  id: string;
+  name: string;
 }
 
-const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
+interface AddItemDialogProps {
+  onItemAdded: () => void;
+  folders?: Folder[];
+  defaultFolderId?: string;
+}
+
+const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -30,6 +37,7 @@ const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
   const [type, setType] = useState<"link" | "image" | "video" | "note">("link");
   const [content, setContent] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [folderId, setFolderId] = useState<string>(defaultFolderId || "none");
   const { toast } = useToast();
 
   const resetForm = () => {
@@ -38,6 +46,7 @@ const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
     setType("link");
     setContent("");
     setThumbnailUrl("");
+    setFolderId(defaultFolderId || "none");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +91,7 @@ const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
         type: validation.data.type,
         content: validation.data.content,
         thumbnail_url: validation.data.thumbnailUrl,
+        folder_id: folderId === "none" ? null : folderId,
       });
 
       if (error) throw error;
@@ -108,7 +118,7 @@ const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity shadow-[var(--shadow-elegant)]">
+        <Button className="bg-gradient-to-r from-primary to-primary hover:opacity-90 shadow-lg shadow-primary/25">
           <Plus className="w-4 h-4 mr-2" />
           Add Item
         </Button>
@@ -118,19 +128,40 @@ const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
           <DialogTitle>Add New Item</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
-            <Select value={type} onValueChange={(value: any) => setType(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="link">Link</SelectItem>
-                <SelectItem value="image">Image</SelectItem>
-                <SelectItem value="video">Video</SelectItem>
-                <SelectItem value="note">Note</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="type">Type</Label>
+              <Select value={type} onValueChange={(value: any) => setType(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="link">Link</SelectItem>
+                  <SelectItem value="image">Image</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="note">Note</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {folders.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="folder">Folder</Label>
+                <Select value={folderId} onValueChange={setFolderId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Folder</SelectItem>
+                    {folders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>
+                        {folder.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -208,7 +239,7 @@ const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-primary to-primary-glow"
+              className="flex-1 bg-gradient-to-r from-primary to-primary"
             >
               {loading ? (
                 <>
