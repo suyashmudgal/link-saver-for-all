@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Loader2, Link2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import FileUploadPreview from "./FileUploadPreview";
 
 const itemSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
@@ -38,6 +40,9 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
   const [content, setContent] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [folderId, setFolderId] = useState<string>(defaultFolderId || "none");
+  const [inputMode, setInputMode] = useState<"url" | "file">("url");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const resetForm = () => {
@@ -47,6 +52,43 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
     setContent("");
     setThumbnailUrl("");
     setFolderId(defaultFolderId || "none");
+    setInputMode("url");
+    setUploadedFile(null);
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl);
+      setFilePreviewUrl(null);
+    }
+  };
+
+  const getFileType = (mimeType: string): "image" | "video" | "note" | "link" => {
+    if (mimeType.startsWith("image/")) return "image";
+    if (mimeType.startsWith("video/")) return "video";
+    if (mimeType.startsWith("audio/")) return "video"; // Treat audio as video type for storage
+    return "note"; // Default to note for documents/other files
+  };
+
+  const handleFileSelect = (file: File) => {
+    setUploadedFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setFilePreviewUrl(previewUrl);
+    
+    // Auto-detect type from file
+    const detectedType = getFileType(file.type);
+    setType(detectedType);
+    
+    // Auto-fill title if empty
+    if (!title) {
+      const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      setTitle(fileName);
+    }
+  };
+
+  const handleFileRemove = () => {
+    setUploadedFile(null);
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl);
+      setFilePreviewUrl(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,30 +96,46 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
     setLoading(true);
 
     try {
-      const validation = itemSchema.safeParse({
-        title,
-        description: description || undefined,
-        type,
-        content,
-        thumbnailUrl: thumbnailUrl || undefined,
-      });
-
-      if (!validation.success) {
-        toast({
-          title: "Validation Error",
-          description: validation.error.errors[0].message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
         toast({
           title: "Error",
           description: "You must be logged in to add items.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      let finalContent = content;
+      let finalThumbnailUrl = thumbnailUrl;
+
+      // If using file upload mode, we store the file info as content
+      if (inputMode === "file" && uploadedFile) {
+        // For local preview, we store file metadata as JSON
+        // In a production app, you would upload to storage and get a URL
+        finalContent = JSON.stringify({
+          fileName: uploadedFile.name,
+          fileSize: uploadedFile.size,
+          fileType: uploadedFile.type,
+          // Store the preview URL temporarily (in production, this would be a storage URL)
+          previewUrl: filePreviewUrl || ""
+        });
+      }
+
+      const validation = itemSchema.safeParse({
+        title,
+        description: description || undefined,
+        type,
+        content: finalContent,
+        thumbnailUrl: finalThumbnailUrl || undefined,
+      });
+
+      if (!validation.success) {
+        toast({
+          title: "Validation Error",
+          description: validation.error.errors[0].message,
           variant: "destructive",
         });
         setLoading(false);
@@ -115,55 +173,158 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
     }
   };
 
+  const isFormValid = () => {
+    if (!title.trim()) return false;
+    if (inputMode === "url") {
+      if (type === "note") return content.trim().length > 0;
+      return content.trim().length > 0;
+    } else {
+      return uploadedFile !== null;
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         <Button className="bg-gradient-to-r from-primary to-primary hover:opacity-90 shadow-lg shadow-primary/25">
           <Plus className="w-4 h-4 mr-2" />
           Add Item
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Item</DialogTitle>
         </DialogHeader>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
-              <Select value={type} onValueChange={(value: any) => setType(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="link">Link</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="note">Note</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Input Mode Tabs */}
+          <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as "url" | "file")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="url" className="flex items-center gap-2">
+                <Link2 className="w-4 h-4" />
+                URL / Text
+              </TabsTrigger>
+              <TabsTrigger value="file" className="flex items-center gap-2">
+                <Upload className="w-4 h-4" />
+                Upload File
+              </TabsTrigger>
+            </TabsList>
 
-            {folders.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="folder">Folder</Label>
-                <Select value={folderId} onValueChange={setFolderId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select folder" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Folder</SelectItem>
-                    {folders.map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <TabsContent value="url" className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Select value={type} onValueChange={(value: any) => setType(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="link">Link</SelectItem>
+                      <SelectItem value="image">Image</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="note">Note</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {folders.length > 0 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="folder">Folder</Label>
+                    <Select value={folderId} onValueChange={setFolderId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select folder" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Folder</SelectItem>
+                        {folders.map((folder) => (
+                          <SelectItem key={folder.id} value={folder.id}>
+                            {folder.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="content">
+                  {type === "note" ? "Note Content" : type === "link" ? "URL" : `${type} URL`}
+                </Label>
+                {type === "note" ? (
+                  <Textarea
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Write your note here..."
+                    required
+                    disabled={loading}
+                    rows={4}
+                  />
+                ) : (
+                  <Input
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder={type === "link" ? "https://example.com" : "Enter URL"}
+                    required
+                    disabled={loading}
+                  />
+                )}
+              </div>
+
+              {(type === "image" || type === "video") && (
+                <div className="space-y-2">
+                  <Label htmlFor="thumbnail">Thumbnail URL (Optional)</Label>
+                  <Input
+                    id="thumbnail"
+                    value={thumbnailUrl}
+                    onChange={(e) => setThumbnailUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    disabled={loading}
+                  />
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="file" className="space-y-4 mt-4">
+              {folders.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="folder-file">Folder</Label>
+                  <Select value={folderId} onValueChange={setFolderId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select folder" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Folder</SelectItem>
+                      {folders.map((folder) => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <FileUploadPreview
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                disabled={loading}
+              />
+
+              {uploadedFile && (
+                <p className="text-xs text-muted-foreground">
+                  Detected type: <span className="capitalize font-medium text-foreground">{type}</span>
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          {/* Common fields */}
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -187,45 +348,6 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">
-              {type === "note" ? "Note Content" : type === "link" ? "URL" : `${type} URL`}
-            </Label>
-            {type === "note" ? (
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your note here..."
-                required
-                disabled={loading}
-                rows={4}
-              />
-            ) : (
-              <Input
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={type === "link" ? "https://example.com" : "Enter URL"}
-                required
-                disabled={loading}
-              />
-            )}
-          </div>
-
-          {(type === "image" || type === "video") && (
-            <div className="space-y-2">
-              <Label htmlFor="thumbnail">Thumbnail URL (Optional)</Label>
-              <Input
-                id="thumbnail"
-                value={thumbnailUrl}
-                onChange={(e) => setThumbnailUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                disabled={loading}
-              />
-            </div>
-          )}
-
           <div className="flex gap-2">
             <Button
               type="button"
@@ -238,7 +360,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isFormValid()}
               className="flex-1 bg-gradient-to-r from-primary to-primary"
             >
               {loading ? (
