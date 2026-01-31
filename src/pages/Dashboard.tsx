@@ -47,6 +47,8 @@ interface Item {
   content: string;
   thumbnail_url?: string;
   folder_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface Folder {
@@ -414,6 +416,8 @@ const Dashboard = () => {
                         content={item.content}
                         thumbnailUrl={item.thumbnail_url}
                         folderId={item.folder_id}
+                        createdAt={item.created_at}
+                        updatedAt={item.updated_at}
                         onDelete={(id) => setDeleteDialog({ type: "item", id })}
                         onMoveToFolder={handleMoveToFolder}
                         folders={folders}
@@ -479,6 +483,8 @@ const Dashboard = () => {
                       content={item.content}
                       thumbnailUrl={item.thumbnail_url}
                       folderId={item.folder_id}
+                      createdAt={item.created_at}
+                      updatedAt={item.updated_at}
                       onDelete={(id) => setDeleteDialog({ type: "item", id })}
                       onMoveToFolder={handleMoveToFolder}
                       folders={folders}

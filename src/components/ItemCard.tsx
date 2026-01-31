@@ -1,9 +1,11 @@
 import { useState, useRef } from "react";
-import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X } from "lucide-react";
+import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Folder {
   id: string;
@@ -35,8 +37,11 @@ interface ItemCardProps {
   content: string;
   thumbnailUrl?: string;
   folderId?: string;
+  createdAt?: string;
+  updatedAt?: string;
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
+  onEdit?: (id: string) => void;
   folders?: Folder[];
 }
 
@@ -48,13 +53,30 @@ const ItemCard = ({
   content, 
   thumbnailUrl, 
   folderId,
+  createdAt,
+  updatedAt,
   onDelete,
   onMoveToFolder,
+  onEdit,
   folders = []
 }: ItemCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isNoteLoading, setIsNoteLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Format date helper
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   // Try to parse content as file metadata
   const parseFileMetadata = (): FileMetadata | null => {
@@ -142,6 +164,12 @@ const ItemCard = ({
       window.open(url, "_blank", "noopener,noreferrer");
     } else if (type === "image" || type === "video") {
       setShowPreview(true);
+    } else if (type === "note") {
+      // Show note preview with brief loading state
+      setIsNoteLoading(true);
+      setShowPreview(true);
+      // Simulate brief loading for smooth UX
+      setTimeout(() => setIsNoteLoading(false), 150);
     }
   };
 
@@ -262,6 +290,101 @@ const ItemCard = ({
 
   const renderPreviewDialog = () => {
     if (!showPreview) return null;
+
+    // Note preview dialog
+    if (type === "note" && !isFileUpload) {
+      return (
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0">
+            <DialogHeader className="p-6 pb-4 border-b shrink-0">
+              <div className="flex items-start justify-between gap-4 pr-8">
+                <div className="space-y-2 min-w-0">
+                  {isNoteLoading ? (
+                    <>
+                      <Skeleton className="h-6 w-48" />
+                      <Skeleton className="h-4 w-32" />
+                    </>
+                  ) : (
+                    <>
+                      <DialogTitle className="text-xl font-semibold leading-tight">
+                        {title}
+                      </DialogTitle>
+                      <DialogDescription className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        {createdAt && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            Created {formatDate(createdAt)}
+                          </span>
+                        )}
+                        {updatedAt && updatedAt !== createdAt && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Updated {formatDate(updatedAt)}
+                          </span>
+                        )}
+                      </DialogDescription>
+                    </>
+                  )}
+                </div>
+              </div>
+            </DialogHeader>
+            
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="p-6">
+                {isNoteLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/6" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ) : (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p className="whitespace-pre-wrap text-foreground leading-relaxed">
+                      {content}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+
+            {!isNoteLoading && (
+              <div className="p-4 border-t flex items-center justify-end gap-2 shrink-0 bg-muted/30">
+                {onEdit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowPreview(false);
+                      onEdit(id);
+                    }}
+                    className="gap-2"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit
+                  </Button>
+                )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPreview(false);
+                    onDelete(id);
+                  }}
+                  className="gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      );
+    }
 
     if (isFileUpload && fileMetadata) {
       const { fileType, previewUrl, fileName } = fileMetadata;
