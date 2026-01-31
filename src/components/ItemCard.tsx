@@ -16,6 +16,7 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
+import LinkPreviewCard from "./LinkPreviewCard";
 
 interface Folder {
   id: string;
@@ -160,8 +161,9 @@ const ItemCard = ({
       // Show inline preview for file uploads
       setShowPreview(true);
     } else if (type === "link" && content) {
-      const url = content.startsWith("http") ? content : `https://${content}`;
-      window.open(url, "_blank", "noopener,noreferrer");
+      // Links now show preview inline - clicking card does nothing
+      // User must click the explicit "Open link" button
+      return;
     } else if (type === "image" || type === "video") {
       setShowPreview(true);
     } else if (type === "note") {
@@ -272,7 +274,7 @@ const ItemCard = ({
       );
     }
 
-    // URL-based thumbnail
+    // URL-based thumbnail for images/videos
     if (thumbnailUrl && (type === "image" || type === "video")) {
       return (
         <div className="w-full h-40 overflow-hidden bg-muted">
@@ -281,6 +283,15 @@ const ItemCard = ({
             alt={title} 
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+        </div>
+      );
+    }
+
+    // Link preview
+    if (type === "link" && !isFileUpload) {
+      return (
+        <div className="p-4">
+          <LinkPreviewCard url={content} />
         </div>
       );
     }
@@ -615,13 +626,6 @@ const ItemCard = ({
 
             {type === "note" && !isFileUpload && (
               <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{content}</p>
-            )}
-
-            {type === "link" && !isFileUpload && (
-              <p className="text-xs text-primary truncate flex items-center gap-1 mt-2">
-                <ExternalLink className="w-3 h-3" />
-                {content}
-              </p>
             )}
 
             {isFileUpload && fileMetadata && (
