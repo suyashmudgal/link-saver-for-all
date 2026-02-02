@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FolderPlus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateFolder } from "@/hooks/use-items";
 import { z } from "zod";
 
 const folderSchema = z.object({
@@ -16,7 +17,6 @@ const folderSchema = z.object({
 });
 
 interface CreateFolderDialogProps {
-  onFolderCreated: () => void;
   trigger?: React.ReactNode;
 }
 
@@ -32,13 +32,13 @@ const FOLDER_COLORS = [
   "#3b82f6", // Blue
 ];
 
-const CreateFolderDialog = ({ onFolderCreated, trigger }: CreateFolderDialogProps) => {
+const CreateFolderDialog = ({ trigger }: CreateFolderDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(FOLDER_COLORS[0]);
   const { toast } = useToast();
+  const createFolder = useCreateFolder();
 
   const resetForm = () => {
     setName("");
@@ -48,67 +48,52 @@ const CreateFolderDialog = ({ onFolderCreated, trigger }: CreateFolderDialogProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const validation = folderSchema.safeParse({
-        name,
-        description: description || undefined,
-        color,
-      });
+    const validation = folderSchema.safeParse({
+      name,
+      description: description || undefined,
+      color,
+    });
 
-      if (!validation.success) {
-        toast({
-          title: "Validation Error",
-          description: validation.error.errors[0].message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to create folders.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      const { error } = await supabase.from("folders").insert({
-        user_id: user.id,
-        name: validation.data.name,
-        description: validation.data.description,
-        color: validation.data.color,
-      });
-
-      if (error) throw error;
-
+    if (!validation.success) {
       toast({
-        title: "Success!",
-        description: "Folder created successfully.",
-      });
-
-      resetForm();
-      setOpen(false);
-      onFolderCreated();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create folder.",
+        title: "Validation Error",
+        description: validation.error.errors[0].message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create folders.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createFolder.mutate({
+      user_id: user.id,
+      name: validation.data.name,
+      description: validation.data.description,
+      color: validation.data.color || FOLDER_COLORS[0],
+      icon: "folder",
+    }, {
+      onSuccess: () => {
+        resetForm();
+        setOpen(false);
+      },
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
@@ -130,7 +115,7 @@ const CreateFolderDialog = ({ onFolderCreated, trigger }: CreateFolderDialogProp
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., YouTube, Projects, Study"
               required
-              disabled={loading}
+              disabled={createFolder.isPending}
             />
           </div>
 
@@ -141,7 +126,7 @@ const CreateFolderDialog = ({ onFolderCreated, trigger }: CreateFolderDialogProp
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add a description for this folder..."
-              disabled={loading}
+              disabled={createFolder.isPending}
               rows={2}
             />
           </div>
@@ -168,17 +153,17 @@ const CreateFolderDialog = ({ onFolderCreated, trigger }: CreateFolderDialogProp
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}
+              disabled={createFolder.isPending}
               className="flex-1"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={createFolder.isPending || !name.trim()}
               className="flex-1 bg-gradient-to-r from-primary to-primary"
             >
-              {loading ? (
+              {createFolder.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
