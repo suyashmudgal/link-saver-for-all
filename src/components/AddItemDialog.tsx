@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Loader2, Link2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateItem, Folder } from "@/hooks/use-items";
 import { z } from "zod";
 import FileUploadPreview from "./FileUploadPreview";
 
@@ -20,20 +21,13 @@ const itemSchema = z.object({
   thumbnailUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
 
-interface Folder {
-  id: string;
-  name: string;
-}
-
 interface AddItemDialogProps {
-  onItemAdded: () => void;
   folders?: Folder[];
   defaultFolderId?: string;
 }
 
-const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDialogProps) => {
+const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<"link" | "image" | "video" | "note">("link");
@@ -44,6 +38,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
+  const createItem = useCreateItem();
 
   const resetForm = () => {
     setTitle("");
@@ -93,84 +88,65 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to add items.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      let finalContent = content;
-      let finalThumbnailUrl = thumbnailUrl;
-
-      // If using file upload mode, we store the file info as content
-      if (inputMode === "file" && uploadedFile) {
-        // For local preview, we store file metadata as JSON
-        // In a production app, you would upload to storage and get a URL
-        finalContent = JSON.stringify({
-          fileName: uploadedFile.name,
-          fileSize: uploadedFile.size,
-          fileType: uploadedFile.type,
-          // Store the preview URL temporarily (in production, this would be a storage URL)
-          previewUrl: filePreviewUrl || ""
-        });
-      }
-
-      const validation = itemSchema.safeParse({
-        title,
-        description: description || undefined,
-        type,
-        content: finalContent,
-        thumbnailUrl: finalThumbnailUrl || undefined,
-      });
-
-      if (!validation.success) {
-        toast({
-          title: "Validation Error",
-          description: validation.error.errors[0].message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      const { error } = await supabase.from("items").insert({
-        user_id: user.id,
-        title: validation.data.title,
-        description: validation.data.description,
-        type: validation.data.type,
-        content: validation.data.content,
-        thumbnail_url: validation.data.thumbnailUrl,
-        folder_id: folderId === "none" ? null : folderId,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Item added to your vault.",
-      });
-
-      resetForm();
-      setOpen(false);
-      onItemAdded();
-    } catch (error: any) {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
       toast({
         title: "Error",
-        description: error.message || "Failed to add item.",
+        description: "You must be logged in to add items.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    let finalContent = content;
+    let finalThumbnailUrl = thumbnailUrl;
+
+    // If using file upload mode, we store the file info as content
+    if (inputMode === "file" && uploadedFile) {
+      // For local preview, we store file metadata as JSON
+      // In a production app, you would upload to storage and get a URL
+      finalContent = JSON.stringify({
+        fileName: uploadedFile.name,
+        fileSize: uploadedFile.size,
+        fileType: uploadedFile.type,
+        // Store the preview URL temporarily (in production, this would be a storage URL)
+        previewUrl: filePreviewUrl || ""
+      });
+    }
+
+    const validation = itemSchema.safeParse({
+      title,
+      description: description || undefined,
+      type,
+      content: finalContent,
+      thumbnailUrl: finalThumbnailUrl || undefined,
+    });
+
+    if (!validation.success) {
+      toast({
+        title: "Validation Error",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createItem.mutate({
+      user_id: user.id,
+      title: validation.data.title,
+      description: validation.data.description,
+      type: validation.data.type,
+      content: validation.data.content,
+      thumbnail_url: validation.data.thumbnailUrl,
+      folder_id: folderId === "none" ? undefined : folderId,
+    }, {
+      onSuccess: () => {
+        resetForm();
+        setOpen(false);
+      },
+    });
   };
 
   const isFormValid = () => {
@@ -261,7 +237,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Write your note here..."
                     required
-                    disabled={loading}
+                    disabled={createItem.isPending}
                     rows={4}
                   />
                 ) : (
@@ -271,7 +247,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
                     onChange={(e) => setContent(e.target.value)}
                     placeholder={type === "link" ? "https://example.com" : "Enter URL"}
                     required
-                    disabled={loading}
+                    disabled={createItem.isPending}
                   />
                 )}
               </div>
@@ -284,7 +260,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
-                    disabled={loading}
+                    disabled={createItem.isPending}
                   />
                 </div>
               )}
@@ -313,7 +289,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
               <FileUploadPreview
                 onFileSelect={handleFileSelect}
                 onFileRemove={handleFileRemove}
-                disabled={loading}
+                disabled={createItem.isPending}
               />
 
               {uploadedFile && (
@@ -333,7 +309,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter a title"
               required
-              disabled={loading}
+              disabled={createItem.isPending}
             />
           </div>
 
@@ -344,7 +320,7 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add a description"
-              disabled={loading}
+              disabled={createItem.isPending}
             />
           </div>
 
@@ -353,17 +329,17 @@ const AddItemDialog = ({ onItemAdded, folders = [], defaultFolderId }: AddItemDi
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}
+              disabled={createItem.isPending}
               className="flex-1"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={loading || !isFormValid()}
+              disabled={createItem.isPending || !isFormValid()}
               className="flex-1 bg-gradient-to-r from-primary to-primary"
             >
-              {loading ? (
+              {createItem.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Adding...

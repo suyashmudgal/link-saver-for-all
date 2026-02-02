@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { 
   Loader2, 
   LogOut, 
@@ -13,7 +12,8 @@ import {
   ArrowLeft,
   FolderOpen,
   LayoutGrid,
-  List
+  List,
+  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ItemCard from "@/components/ItemCard";
@@ -21,6 +21,8 @@ import AddItemDialog from "@/components/AddItemDialog";
 import CreateFolderDialog from "@/components/CreateFolderDialog";
 import FolderCard from "@/components/FolderCard";
 import ThemeToggle from "@/components/ThemeToggle";
+import EditItemDialog from "@/components/EditItemDialog";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,41 +39,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-
-interface Item {
-  id: string;
-  title: string;
-  description?: string;
-  type: "link" | "image" | "video" | "note";
-  content: string;
-  thumbnail_url?: string;
-  folder_id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface Folder {
-  id: string;
-  name: string;
-  description?: string;
-  color: string;
-  itemCount?: number;
-}
+import { 
+  useItems, 
+  useFolders, 
+  useDeleteItem, 
+  useDeleteFolder, 
+  useUpdateFolder, 
+  useMoveItem,
+  Item,
+  Folder
+} from "@/hooks/use-items";
+import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
-  const [items, setItems] = useState<Item[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ type: "folder" | "item"; id: string } | null>(null);
   const [renameDialog, setRenameDialog] = useState<Folder | null>(null);
   const [renameName, setRenameName] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [editItem, setEditItem] = useState<Item | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
+
+  // React Query hooks for cached data
+  const { data: items = [], isLoading: itemsLoading, isFetching: itemsFetching } = useItems();
+  const { data: folders = [], isLoading: foldersLoading } = useFolders();
+  const deleteItem = useDeleteItem();
+  const deleteFolder = useDeleteFolder();
+  const updateFolder = useUpdateFolder();
+  const moveItem = useMoveItem();
+
+  const loading = authLoading || itemsLoading || foldersLoading;
 
   useEffect(() => {
     const checkSession = async () => {
@@ -80,8 +80,8 @@ const Dashboard = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
-        fetchData();
       }
+      setAuthLoading(false);
     };
 
     checkSession();
@@ -97,130 +97,31 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch folders with item counts
-      const { data: foldersData, error: foldersError } = await supabase
-        .from("folders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (foldersError) throw foldersError;
-
-      // Fetch items
-      const { data: itemsData, error: itemsError } = await supabase
-        .from("items")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (itemsError) throw itemsError;
-
-      // Calculate item counts for folders
-      const foldersWithCounts = (foldersData || []).map(folder => ({
-        ...folder,
-        itemCount: (itemsData || []).filter(item => item.folder_id === folder.id).length
-      }));
-
-      setFolders(foldersWithCounts);
-      setItems(itemsData || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to load data.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleDeleteItem = (id: string) => {
+    deleteItem.mutate(id);
+    setDeleteDialog(null);
   };
 
-  const handleDeleteItem = async (id: string) => {
-    try {
-      const { error } = await supabase.from("items").delete().eq("id", id);
-      if (error) throw error;
-
-      toast({
-        title: "Deleted",
-        description: "Item removed from your vault.",
-      });
-      fetchData();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to delete item.",
-        variant: "destructive",
-      });
-    }
+  const handleDeleteFolder = (id: string) => {
+    deleteFolder.mutate(id);
+    setDeleteDialog(null);
+    setSelectedFolder(null);
   };
 
-  const handleDeleteFolder = async (id: string) => {
-    try {
-      const { error } = await supabase.from("folders").delete().eq("id", id);
-      if (error) throw error;
-
-      toast({
-        title: "Deleted",
-        description: "Folder deleted. Items moved to root.",
-      });
-      setSelectedFolder(null);
-      fetchData();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to delete folder.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRenameFolder = async () => {
+  const handleRenameFolder = () => {
     if (!renameDialog || !renameName.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from("folders")
-        .update({ name: renameName.trim() })
-        .eq("id", renameDialog.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Renamed",
-        description: "Folder renamed successfully.",
-      });
-      setRenameDialog(null);
-      fetchData();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to rename folder.",
-        variant: "destructive",
-      });
-    }
+    updateFolder.mutate({ id: renameDialog.id, name: renameName.trim() });
+    setRenameDialog(null);
   };
 
-  const handleMoveToFolder = async (itemId: string, folderId: string | null) => {
-    try {
-      const { error } = await supabase
-        .from("items")
-        .update({ folder_id: folderId })
-        .eq("id", itemId);
+  const handleMoveToFolder = (itemId: string, folderId: string | null) => {
+    moveItem.mutate({ itemId, folderId });
+  };
 
-      if (error) throw error;
-
-      toast({
-        title: "Moved",
-        description: folderId ? "Item moved to folder." : "Item removed from folder.",
-      });
-      fetchData();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to move item.",
-        variant: "destructive",
-      });
+  const handleEditItem = (id: string) => {
+    const item = items.find(i => i.id === id);
+    if (item) {
+      setEditItem(item);
     }
   };
 
@@ -229,35 +130,50 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  // Filter items based on search and selected folder
-  const filteredItems = items.filter(item => {
-    const matchesSearch = searchQuery
-      ? item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.content.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
+  // Memoized filtered items for performance
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      const matchesSearch = searchQuery
+        ? item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.content.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
 
-    const matchesFolder = selectedFolder
-      ? item.folder_id === selectedFolder.id
-      : true;
+      const matchesFolder = selectedFolder
+        ? item.folder_id === selectedFolder.id
+        : true;
 
-    return matchesSearch && matchesFolder;
-  });
+      return matchesSearch && matchesFolder;
+    });
+  }, [items, searchQuery, selectedFolder]);
 
   // Items without folder for root view
-  const unfolderedItems = items.filter(item => !item.folder_id);
+  const unfolderedItems = useMemo(() => {
+    return items.filter(item => !item.folder_id);
+  }, [items]);
+
+  // Stats for header
+  const stats = useMemo(() => ({
+    totalItems: items.length,
+    totalFolders: folders.length,
+    links: items.filter(i => i.type === "link").length,
+    notes: items.filter(i => i.type === "note").length,
+  }), [items, folders]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading your vault...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Enhanced Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -272,23 +188,36 @@ const Dashboard = () => {
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
               )}
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary flex items-center justify-center shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25">
                   <Sparkles className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold">DataVault</h1>
-                  {selectedFolder && (
+                  <h1 className="text-lg font-bold tracking-tight">DataVault</h1>
+                  {selectedFolder ? (
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <FolderOpen className="w-3 h-3" style={{ color: selectedFolder.color }} />
                       {selectedFolder.name}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground flex items-center gap-2">
+                      <span>{stats.totalItems} items</span>
+                      <span className="text-border">•</span>
+                      <span>{stats.totalFolders} folders</span>
                     </p>
                   )}
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Cache status indicator */}
+              {itemsFetching && (
+                <Badge variant="outline" className="text-xs gap-1 hidden sm:flex">
+                  <Zap className="w-3 h-3 animate-pulse" />
+                  Syncing
+                </Badge>
+              )}
               <ThemeToggle />
               <Button
                 variant="ghost"
@@ -312,12 +241,12 @@ const Dashboard = () => {
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card"
+              className="pl-10 bg-card border-border/50 focus-visible:ring-primary/50"
             />
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="flex items-center border border-border rounded-lg p-1">
+            <div className="flex items-center border border-border/50 rounded-lg p-1 bg-card">
               <Button
                 variant={viewMode === "grid" ? "secondary" : "ghost"}
                 size="icon"
@@ -336,9 +265,8 @@ const Dashboard = () => {
               </Button>
             </div>
             
-            {!selectedFolder && <CreateFolderDialog onFolderCreated={fetchData} />}
+            {!selectedFolder && <CreateFolderDialog />}
             <AddItemDialog 
-              onItemAdded={fetchData} 
               folders={folders}
               defaultFolderId={selectedFolder?.id}
             />
@@ -420,6 +348,7 @@ const Dashboard = () => {
                         updatedAt={item.updated_at}
                         onDelete={(id) => setDeleteDialog({ type: "item", id })}
                         onMoveToFolder={handleMoveToFolder}
+                        onEdit={handleEditItem}
                         folders={folders}
                       />
                     ))}
@@ -430,16 +359,18 @@ const Dashboard = () => {
               {/* Empty State */}
               {folders.length === 0 && unfolderedItems.length === 0 && !searchQuery && (
                 <div className="text-center py-20">
-                  <Database className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h2 className="text-2xl font-semibold mb-2 text-muted-foreground">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <Database className="w-10 h-10 text-primary/60" />
+                  </div>
+                  <h2 className="text-2xl font-semibold mb-2">
                     Welcome to DataVault
                   </h2>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                     Start by creating folders to organize your content, then add links, images, videos, or notes.
                   </p>
                   <div className="flex items-center justify-center gap-3">
-                    <CreateFolderDialog onFolderCreated={fetchData} />
-                    <AddItemDialog onItemAdded={fetchData} folders={folders} />
+                    <CreateFolderDialog />
+                    <AddItemDialog folders={folders} />
                   </div>
                 </div>
               )}
@@ -487,6 +418,7 @@ const Dashboard = () => {
                       updatedAt={item.updated_at}
                       onDelete={(id) => setDeleteDialog({ type: "item", id })}
                       onMoveToFolder={handleMoveToFolder}
+                      onEdit={handleEditItem}
                       folders={folders}
                     />
                   ))}
@@ -505,7 +437,6 @@ const Dashboard = () => {
                   </p>
                   {!searchQuery && (
                     <AddItemDialog 
-                      onItemAdded={fetchData} 
                       folders={folders}
                       defaultFolderId={selectedFolder.id}
                     />
@@ -516,6 +447,14 @@ const Dashboard = () => {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Edit Item Dialog */}
+      <EditItemDialog
+        item={editItem}
+        open={!!editItem}
+        onOpenChange={(open) => !open && setEditItem(null)}
+        folders={folders}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
@@ -541,7 +480,6 @@ const Dashboard = () => {
                 } else if (deleteDialog?.type === "item") {
                   handleDeleteItem(deleteDialog.id);
                 }
-                setDeleteDialog(null);
               }}
             >
               Delete
@@ -570,8 +508,12 @@ const Dashboard = () => {
               <Button variant="outline" onClick={() => setRenameDialog(null)}>
                 Cancel
               </Button>
-              <Button onClick={handleRenameFolder}>
-                Rename
+              <Button onClick={handleRenameFolder} disabled={updateFolder.isPending}>
+                {updateFolder.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Rename"
+                )}
               </Button>
             </div>
           </div>

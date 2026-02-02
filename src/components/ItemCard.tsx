@@ -582,6 +582,15 @@ const ItemCard = ({
                       View Preview
                     </DropdownMenuItem>
                   )}
+                  {onEdit && (
+                    <DropdownMenuItem onClick={(e) => { 
+                      e.stopPropagation(); 
+                      onEdit(id);
+                    }}>
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
                   {onMoveToFolder && folders.length > 0 && (
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
