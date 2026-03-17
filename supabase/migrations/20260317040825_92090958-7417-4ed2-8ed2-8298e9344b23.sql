@@ -1,0 +1,1 @@
+ALTER TABLE public.folders ADD COLUMN parent_id UUID REFERENCES public.folders(id) ON DELETE SET NULL;
