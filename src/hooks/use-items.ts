@@ -20,7 +20,9 @@ export interface Folder {
   description?: string;
   color: string;
   icon?: string;
+  parent_id?: string | null;
   itemCount?: number;
+  subfolderCount?: number;
 }
 
 // Query keys for cache management
@@ -43,13 +45,13 @@ export const useItems = () => {
       if (error) throw error;
       return (data || []) as Item[];
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
-    gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache
-    refetchOnWindowFocus: false, // Don't refetch on tab focus
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
   });
 };
 
-// Fetch all folders with item counts
+// Fetch all folders with item counts and subfolder counts
 export const useFolders = () => {
   const { data: items = [] } = useItems();
 
@@ -68,10 +70,10 @@ export const useFolders = () => {
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
     select: (folders) => {
-      // Add item counts to folders
       return folders.map(folder => ({
         ...folder,
-        itemCount: items.filter(item => item.folder_id === folder.id).length
+        itemCount: items.filter(item => item.folder_id === folder.id).length,
+        subfolderCount: folders.filter(f => f.parent_id === folder.id).length,
       }));
     },
   });
@@ -94,20 +96,12 @@ export const useCreateItem = () => {
       return data;
     },
     onSuccess: () => {
-      // Invalidate and refetch items
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Success!",
-        description: "Item added to your vault.",
-      });
+      toast({ title: "Success!", description: "Item added to your vault." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add item.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to add item.", variant: "destructive" });
     },
   });
 };
@@ -132,17 +126,10 @@ export const useUpdateItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Updated",
-        description: "Item updated successfully.",
-      });
+      toast({ title: "Updated", description: "Item updated successfully." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update item.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to update item.", variant: "destructive" });
     },
   });
 };
@@ -154,27 +141,16 @@ export const useDeleteItem = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("items")
-        .delete()
-        .eq("id", id);
-
+      const { error } = await supabase.from("items").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Deleted",
-        description: "Item removed from your vault.",
-      });
+      toast({ title: "Deleted", description: "Item removed from your vault." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete item.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to delete item.", variant: "destructive" });
     },
   });
 };
@@ -196,28 +172,21 @@ export const useMoveItem = () => {
     onSuccess: (_, { folderId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Moved",
-        description: folderId ? "Item moved to folder." : "Item removed from folder.",
-      });
+      toast({ title: "Moved", description: folderId ? "Item moved to folder." : "Item removed from folder." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to move item.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to move item.", variant: "destructive" });
     },
   });
 };
 
-// Create folder mutation
+// Create folder mutation (with parent_id support)
 export const useCreateFolder = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (folder: { name: string; description?: string; color: string; icon: string; user_id: string }) => {
+    mutationFn: async (folder: { name: string; description?: string; color: string; icon: string; user_id: string; parent_id?: string }) => {
       const { data, error } = await supabase
         .from("folders")
         .insert(folder)
@@ -229,17 +198,10 @@ export const useCreateFolder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Created!",
-        description: "Folder created successfully.",
-      });
+      toast({ title: "Created!", description: "Folder created successfully." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create folder.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to create folder.", variant: "destructive" });
     },
   });
 };
@@ -263,17 +225,10 @@ export const useUpdateFolder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Renamed",
-        description: "Folder renamed successfully.",
-      });
+      toast({ title: "Renamed", description: "Folder renamed successfully." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to rename folder.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to rename folder.", variant: "destructive" });
     },
   });
 };
@@ -285,27 +240,16 @@ export const useDeleteFolder = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("folders")
-        .delete()
-        .eq("id", id);
-
+      const { error } = await supabase.from("folders").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({
-        title: "Deleted",
-        description: "Folder deleted. Items moved to root.",
-      });
+      toast({ title: "Deleted", description: "Folder deleted. Items moved to root." });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete folder.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to delete folder.", variant: "destructive" });
     },
   });
 };
