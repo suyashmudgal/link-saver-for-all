@@ -1,10 +1,14 @@
-import { FolderOpen, ChevronRight, MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { FolderOpen, ChevronRight, MoreVertical, Edit2, Trash2, MoveRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
@@ -14,18 +18,31 @@ interface Folder {
   name: string;
   description?: string;
   color: string;
+  parent_id?: string | null;
   itemCount?: number;
   subfolderCount?: number;
 }
 
 interface FolderCardProps {
   folder: Folder;
+  allFolders?: Folder[];
   onClick: () => void;
   onRename: () => void;
   onDelete: () => void;
+  onMove?: (folderId: string, newParentId: string | null) => void;
 }
 
-const FolderCard = ({ folder, onClick, onRename, onDelete }: FolderCardProps) => {
+const FolderCard = ({ folder, allFolders = [], onClick, onRename, onDelete, onMove }: FolderCardProps) => {
+  // Get valid move targets: exclude self, current parent, and descendants
+  const getDescendantIds = (id: string): string[] => {
+    const children = allFolders.filter(f => f.parent_id === id);
+    return [id, ...children.flatMap(c => getDescendantIds(c.id))];
+  };
+
+  const excludeIds = new Set(getDescendantIds(folder.id));
+  const moveTargets = allFolders.filter(f => !excludeIds.has(f.id));
+  const canMoveToRoot = !!folder.parent_id;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -37,13 +54,10 @@ const FolderCard = ({ folder, onClick, onRename, onDelete }: FolderCardProps) =>
         className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg border-border/50 hover:border-primary/30 gradient-border"
         onClick={onClick}
       >
-        {/* Colored accent strip at top */}
         <div 
           className="h-1.5 w-full"
           style={{ background: `linear-gradient(90deg, ${folder.color}, ${folder.color}88)` }}
         />
-
-        {/* Subtle background tint */}
         <div 
           className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundColor: folder.color }}
@@ -71,11 +85,37 @@ const FolderCard = ({ folder, onClick, onRename, onDelete }: FolderCardProps) =>
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}>
                   <Edit2 className="w-4 h-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
+                {onMove && (moveTargets.length > 0 || canMoveToRoot) && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <MoveRight className="w-4 h-4 mr-2" />
+                      Move to
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="max-h-60 overflow-y-auto">
+                      {canMoveToRoot && (
+                        <>
+                          <DropdownMenuItem onClick={() => onMove(folder.id, null)}>
+                            <FolderOpen className="w-4 h-4 mr-2 text-muted-foreground" />
+                            Root (no parent)
+                          </DropdownMenuItem>
+                          {moveTargets.length > 0 && <DropdownMenuSeparator />}
+                        </>
+                      )}
+                      {moveTargets.map(t => (
+                        <DropdownMenuItem key={t.id} onClick={() => onMove(folder.id, t.id)}>
+                          <FolderOpen className="w-4 h-4 mr-2" style={{ color: t.color }} />
+                          {t.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                   className="text-destructive"

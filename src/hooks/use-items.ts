@@ -233,6 +233,30 @@ export const useUpdateFolder = () => {
   });
 };
 
+// Move folder mutation
+export const useMoveFolder = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ folderId, parentId }: { folderId: string; parentId: string | null }) => {
+      const { error } = await supabase
+        .from("folders")
+        .update({ parent_id: parentId })
+        .eq("id", folderId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { parentId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
+      toast({ title: "Moved", description: parentId ? "Folder moved successfully." : "Folder moved to root." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message || "Failed to move folder.", variant: "destructive" });
+    },
+  });
+};
+
 // Delete folder mutation
 export const useDeleteFolder = () => {
   const queryClient = useQueryClient();
