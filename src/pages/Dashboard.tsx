@@ -347,9 +347,11 @@ const Dashboard = () => {
                       <FolderCard
                         key={folder.id}
                         folder={folder}
+                        allFolders={folders}
                         onClick={() => setSelectedFolder(folder)}
                         onRename={() => { setRenameName(folder.name); setRenameDialog(folder); }}
                         onDelete={() => setDeleteDialog({ type: "folder", id: folder.id })}
+                        onMove={handleMoveFolder}
                       />
                     ))}
                   </div>
