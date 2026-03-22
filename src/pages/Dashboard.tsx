@@ -46,6 +46,7 @@ const Dashboard = () => {
   const deleteFolder = useDeleteFolder();
   const updateFolder = useUpdateFolder();
   const moveItem = useMoveItem();
+  const moveFolder = useMoveFolder();
 
   const loading = authLoading || itemsLoading || foldersLoading;
 
