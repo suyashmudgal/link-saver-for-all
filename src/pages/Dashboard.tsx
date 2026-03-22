@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { 
   useItems, useFolders, useDeleteItem, useDeleteFolder, 
-  useUpdateFolder, useMoveItem, Item, Folder
+  useUpdateFolder, useMoveItem, useMoveFolder, Item, Folder
 } from "@/hooks/use-items";
 import { Badge } from "@/components/ui/badge";
 
@@ -46,6 +46,7 @@ const Dashboard = () => {
   const deleteFolder = useDeleteFolder();
   const updateFolder = useUpdateFolder();
   const moveItem = useMoveItem();
+  const moveFolder = useMoveFolder();
 
   const loading = authLoading || itemsLoading || foldersLoading;
 
@@ -70,6 +71,7 @@ const Dashboard = () => {
     setRenameDialog(null);
   };
   const handleMoveToFolder = (itemId: string, folderId: string | null) => { moveItem.mutate({ itemId, folderId }); };
+  const handleMoveFolder = (folderId: string, parentId: string | null) => { moveFolder.mutate({ folderId, parentId }); };
   const handleEditItem = (id: string) => { const item = items.find(i => i.id === id); if (item) setEditItem(item); };
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };
 
@@ -262,9 +264,11 @@ const Dashboard = () => {
                         <FolderCard
                           key={folder.id}
                           folder={folder}
+                          allFolders={folders}
                           onClick={() => setSelectedFolder(folder)}
                           onRename={() => { setRenameName(folder.name); setRenameDialog(folder); }}
                           onDelete={() => setDeleteDialog({ type: "folder", id: folder.id })}
+                          onMove={handleMoveFolder}
                         />
                       ))}
                   </div>
@@ -343,9 +347,11 @@ const Dashboard = () => {
                       <FolderCard
                         key={folder.id}
                         folder={folder}
+                        allFolders={folders}
                         onClick={() => setSelectedFolder(folder)}
                         onRename={() => { setRenameName(folder.name); setRenameDialog(folder); }}
                         onDelete={() => setDeleteDialog({ type: "folder", id: folder.id })}
+                        onMove={handleMoveFolder}
                       />
                     ))}
                   </div>
