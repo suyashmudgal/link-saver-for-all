@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { 
   useItems, useFolders, useDeleteItem, useDeleteFolder, 
-  useUpdateFolder, useMoveItem, Item, Folder
+  useUpdateFolder, useMoveItem, useMoveFolder, Item, Folder
 } from "@/hooks/use-items";
 import { Badge } from "@/components/ui/badge";
 
