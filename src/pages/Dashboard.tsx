@@ -71,6 +71,7 @@ const Dashboard = () => {
     setRenameDialog(null);
   };
   const handleMoveToFolder = (itemId: string, folderId: string | null) => { moveItem.mutate({ itemId, folderId }); };
+  const handleMoveFolder = (folderId: string, parentId: string | null) => { moveFolder.mutate({ folderId, parentId }); };
   const handleEditItem = (id: string) => { const item = items.find(i => i.id === id); if (item) setEditItem(item); };
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };
 
