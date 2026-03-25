@@ -60,9 +60,12 @@ const ItemCard = ({
   folderId,
   createdAt,
   updatedAt,
+  tags = [],
+  isFavorite = false,
   onDelete,
   onMoveToFolder,
   onEdit,
+  onToggleFavorite,
   folders = []
 }: ItemCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
