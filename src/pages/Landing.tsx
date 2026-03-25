@@ -163,8 +163,7 @@ const Landing = () => {
               <span className="text-sm text-primary font-medium">Your Personal Data Vault</span>
             </motion.div>
 
-            <motion.h1 
-              variants={fadeInUp}
+            <h1 
               className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
             >
               Organize Everything
@@ -172,7 +171,7 @@ const Landing = () => {
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                 In One Place
               </span>
-            </motion.h1>
+            </h1>
 
             <motion.p 
               variants={fadeInUp}
