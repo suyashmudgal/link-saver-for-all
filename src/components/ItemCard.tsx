@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil } from "lucide-react";
+import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import LinkPreviewCard from "./LinkPreviewCard";
+import { getTagColor } from "./TagInput";
 
 interface Folder {
   id: string;
@@ -40,9 +41,12 @@ interface ItemCardProps {
   folderId?: string;
   createdAt?: string;
   updatedAt?: string;
+  tags?: string[];
+  isFavorite?: boolean;
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
   onEdit?: (id: string) => void;
+  onToggleFavorite?: (id: string) => void;
   folders?: Folder[];
 }
 
