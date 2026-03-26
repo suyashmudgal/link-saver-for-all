@@ -15,7 +15,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Loader2, Database, FolderOpen, LayoutGrid, List, Zap, 
-  ChevronRight, ArrowLeft
+  ChevronRight, ArrowLeft, Download
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardLayout from "@/components/DashboardLayout";
