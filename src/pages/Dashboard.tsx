@@ -218,6 +218,12 @@ const Dashboard = () => {
               </div>
               <CreateFolderDialog folders={folders} defaultParentId={selectedFolder?.id} />
               <AddItemDialog folders={folders} defaultFolderId={selectedFolder?.id} />
+              {items.length > 0 && (
+                <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export CSV</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
