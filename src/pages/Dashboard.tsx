@@ -15,7 +15,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Loader2, Database, FolderOpen, LayoutGrid, List, Zap, 
-  ChevronRight, ArrowLeft
+  ChevronRight, ArrowLeft, Download
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -68,6 +68,31 @@ const Dashboard = () => {
   const handleToggleFavorite = (id: string) => {
     const item = items.find(i => i.id === id);
     if (item) toggleFavorite.mutate({ id, is_favorite: !item.is_favorite });
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Title", "Type", "URL/Content", "Description", "Tags", "Favorite", "Folder", "Created At"];
+    const rows = items.map(item => {
+      const folder = folders.find(f => f.id === item.folder_id);
+      return [
+        item.title,
+        item.type,
+        item.content,
+        item.description || "",
+        (item.tags || []).join("; "),
+        item.is_favorite ? "Yes" : "No",
+        folder?.name || "",
+        new Date(item.created_at).toLocaleDateString(),
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(",");
+    });
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `datavault-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const subfolders = useMemo(() => {
@@ -193,6 +218,12 @@ const Dashboard = () => {
               </div>
               <CreateFolderDialog folders={folders} defaultParentId={selectedFolder?.id} />
               <AddItemDialog folders={folders} defaultFolderId={selectedFolder?.id} />
+              {items.length > 0 && (
+                <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export CSV</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
