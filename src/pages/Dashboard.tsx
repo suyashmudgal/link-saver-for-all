@@ -24,6 +24,7 @@ import FolderCard from "@/components/FolderCard";
 import AddItemDialog from "@/components/AddItemDialog";
 import CreateFolderDialog from "@/components/CreateFolderDialog";
 import EditItemDialog from "@/components/EditItemDialog";
+import CreateShareDialog from "@/components/CreateShareDialog";
 import SearchFilters, { SearchFiltersState } from "@/components/SearchFilters";
 
 const Dashboard = () => {
