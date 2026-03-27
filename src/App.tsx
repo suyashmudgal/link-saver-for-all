@@ -11,6 +11,8 @@ import Links from "./pages/Links";
 import Favorites from "./pages/Favorites";
 import Insights from "./pages/Insights";
 import Admin from "./pages/Admin";
+import SharedCollections from "./pages/SharedCollections";
+import SharedView from "./pages/SharedView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
