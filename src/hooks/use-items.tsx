@@ -211,7 +211,7 @@ export const useMoveItem = () => {
         description: folderId ? "Item organized into folder." : "Item moved to root.",
         action: (
           <ToastAction altText="Undo" onClick={async () => {
-            await supabase.from("items").update({ folder_id: folderId ? null : undefined }).eq("id", itemId);
+            await supabase.from("items").update({ folder_id: prevFolderId }).eq("id", itemId);
             queryClient.invalidateQueries({ queryKey: queryKeys.items });
             queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
           }}>
