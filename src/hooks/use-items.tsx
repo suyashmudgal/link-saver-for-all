@@ -198,10 +198,12 @@ export const useMoveItem = () => {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ itemId, folderId }: { itemId: string; folderId: string | null }) => {
+      const { data: prev } = await supabase.from("items").select("folder_id").eq("id", itemId).single();
       const { error } = await supabase.from("items").update({ folder_id: folderId }).eq("id", itemId);
       if (error) throw error;
+      return prev?.folder_id ?? null;
     },
-    onSuccess: (_, { itemId, folderId }) => {
+    onSuccess: (prevFolderId, { itemId, folderId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
       toast({
