@@ -84,10 +84,22 @@ export const useCreateItem = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({ title: "Success!", description: "Item added to your vault." });
+      toast({
+        title: "✅ Item saved!",
+        description: `"${data.title}" added to your vault.`,
+        action: (
+          <ToastAction altText="Undo" onClick={async () => {
+            await supabase.from("items").delete().eq("id", data.id);
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+            queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
+          }}>
+            Undo
+          </ToastAction>
+        ),
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message || "Failed to add item.", variant: "destructive" });
