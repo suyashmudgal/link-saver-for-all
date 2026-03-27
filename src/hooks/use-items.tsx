@@ -131,15 +131,32 @@ export const useUpdateItem = () => {
 export const useDeleteItem = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  
   return useMutation({
     mutationFn: async (id: string) => {
+      // Fetch item before deleting for undo
+      const { data: item } = await supabase.from("items").select("*").eq("id", id).single();
       const { error } = await supabase.from("items").delete().eq("id", id);
       if (error) throw error;
+      return item;
     },
-    onSuccess: () => {
+    onSuccess: (deletedItem) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({ title: "Deleted", description: "Item removed from your vault." });
+      toast({
+        title: "🗑️ Deleted",
+        description: deletedItem ? `"${deletedItem.title}" removed.` : "Item removed from your vault.",
+        action: deletedItem ? (
+          <ToastAction altText="Undo" onClick={async () => {
+            const { id: _id, created_at, updated_at, ...rest } = deletedItem;
+            await supabase.from("items").insert({ ...rest, id: _id });
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+            queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
+          }}>
+            Undo
+          </ToastAction>
+        ) : undefined,
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message || "Failed to delete item.", variant: "destructive" });
@@ -155,9 +172,20 @@ export const useToggleFavorite = () => {
       const { error } = await supabase.from("items").update({ is_favorite }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_, { is_favorite }) => {
+    onSuccess: (_, { id, is_favorite }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
-      toast({ title: is_favorite ? "⭐ Favorited" : "Unfavorited", description: is_favorite ? "Added to favorites." : "Removed from favorites." });
+      toast({
+        title: is_favorite ? "⭐ Added to Favorites" : "💔 Removed from Favorites",
+        description: is_favorite ? "You can find it in your Favorites tab." : "Item unfavorited.",
+        action: (
+          <ToastAction altText="Undo" onClick={async () => {
+            await supabase.from("items").update({ is_favorite: !is_favorite }).eq("id", id);
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+          }}>
+            Undo
+          </ToastAction>
+        ),
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -170,13 +198,27 @@ export const useMoveItem = () => {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ itemId, folderId }: { itemId: string; folderId: string | null }) => {
+      const { data: prev } = await supabase.from("items").select("folder_id").eq("id", itemId).single();
       const { error } = await supabase.from("items").update({ folder_id: folderId }).eq("id", itemId);
       if (error) throw error;
+      return prev?.folder_id ?? null;
     },
-    onSuccess: (_, { folderId }) => {
+    onSuccess: (prevFolderId, { itemId, folderId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({ title: "Moved", description: folderId ? "Item moved to folder." : "Item removed from folder." });
+      toast({
+        title: folderId ? "📁 Moved to Folder" : "📤 Removed from Folder",
+        description: folderId ? "Item organized into folder." : "Item moved to root.",
+        action: (
+          <ToastAction altText="Undo" onClick={async () => {
+            await supabase.from("items").update({ folder_id: prevFolderId }).eq("id", itemId);
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+            queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
+          }}>
+            Undo
+          </ToastAction>
+        ),
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message || "Failed to move item.", variant: "destructive" });
