@@ -155,6 +155,75 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_collection_items: {
+        Row: {
+          added_at: string
+          collection_id: string
+          id: string
+          item_id: string
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          id?: string
+          item_id: string
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          id?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "shared_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_collection_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          share_token: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          share_token?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          share_token?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
