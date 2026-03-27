@@ -131,7 +131,7 @@ export const useUpdateItem = () => {
 export const useDeleteItem = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const createItem = useCreateItem();
+  
   return useMutation({
     mutationFn: async (id: string) => {
       // Fetch item before deleting for undo
