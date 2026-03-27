@@ -32,6 +32,8 @@ const App = () => (
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/shared" element={<SharedCollections />} />
+            <Route path="/shared/:token" element={<SharedView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

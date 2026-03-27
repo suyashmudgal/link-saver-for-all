@@ -35,6 +35,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     { title: "All Links", url: "/links", icon: Link2 },
     { title: "Favorites", url: "/favorites", icon: Star },
     { title: "Insights", url: "/insights", icon: BarChart3 },
+    { title: "Shared", url: "/shared", icon: Share2 },
   ];
 
   if (isAdmin) {
