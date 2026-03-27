@@ -24,6 +24,7 @@ import FolderCard from "@/components/FolderCard";
 import AddItemDialog from "@/components/AddItemDialog";
 import CreateFolderDialog from "@/components/CreateFolderDialog";
 import EditItemDialog from "@/components/EditItemDialog";
+import CreateShareDialog from "@/components/CreateShareDialog";
 import SearchFilters, { SearchFiltersState } from "@/components/SearchFilters";
 
 const Dashboard = () => {
@@ -218,6 +219,7 @@ const Dashboard = () => {
               </div>
               <CreateFolderDialog folders={folders} defaultParentId={selectedFolder?.id} />
               <AddItemDialog folders={folders} defaultFolderId={selectedFolder?.id} />
+              <CreateShareDialog />
               {items.length > 0 && (
                 <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
                   <Download className="w-4 h-4" />

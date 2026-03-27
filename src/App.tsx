@@ -11,6 +11,8 @@ import Links from "./pages/Links";
 import Favorites from "./pages/Favorites";
 import Insights from "./pages/Insights";
 import Admin from "./pages/Admin";
+import SharedCollections from "./pages/SharedCollections";
+import SharedView from "./pages/SharedView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/shared" element={<SharedCollections />} />
+            <Route path="/shared/:token" element={<SharedView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
