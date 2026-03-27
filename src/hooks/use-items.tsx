@@ -201,10 +201,22 @@ export const useMoveItem = () => {
       const { error } = await supabase.from("items").update({ folder_id: folderId }).eq("id", itemId);
       if (error) throw error;
     },
-    onSuccess: (_, { folderId }) => {
+    onSuccess: (_, { itemId, folderId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({ title: "Moved", description: folderId ? "Item moved to folder." : "Item removed from folder." });
+      toast({
+        title: folderId ? "📁 Moved to Folder" : "📤 Removed from Folder",
+        description: folderId ? "Item organized into folder." : "Item moved to root.",
+        action: (
+          <ToastAction altText="Undo" onClick={async () => {
+            await supabase.from("items").update({ folder_id: folderId ? null : undefined }).eq("id", itemId);
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+            queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
+          }}>
+            Undo
+          </ToastAction>
+        ),
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message || "Failed to move item.", variant: "destructive" });
