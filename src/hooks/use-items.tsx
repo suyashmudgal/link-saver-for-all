@@ -131,15 +131,32 @@ export const useUpdateItem = () => {
 export const useDeleteItem = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const createItem = useCreateItem();
   return useMutation({
     mutationFn: async (id: string) => {
+      // Fetch item before deleting for undo
+      const { data: item } = await supabase.from("items").select("*").eq("id", id).single();
       const { error } = await supabase.from("items").delete().eq("id", id);
       if (error) throw error;
+      return item;
     },
-    onSuccess: () => {
+    onSuccess: (deletedItem) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
       queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
-      toast({ title: "Deleted", description: "Item removed from your vault." });
+      toast({
+        title: "🗑️ Deleted",
+        description: deletedItem ? `"${deletedItem.title}" removed.` : "Item removed from your vault.",
+        action: deletedItem ? (
+          <ToastAction altText="Undo" onClick={async () => {
+            const { id: _id, created_at, updated_at, ...rest } = deletedItem;
+            await supabase.from("items").insert({ ...rest, id: _id });
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+            queryClient.invalidateQueries({ queryKey: queryKeys.foldersWithCounts });
+          }}>
+            Undo
+          </ToastAction>
+        ) : undefined,
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message || "Failed to delete item.", variant: "destructive" });
