@@ -172,9 +172,20 @@ export const useToggleFavorite = () => {
       const { error } = await supabase.from("items").update({ is_favorite }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_, { is_favorite }) => {
+    onSuccess: (_, { id, is_favorite }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items });
-      toast({ title: is_favorite ? "⭐ Favorited" : "Unfavorited", description: is_favorite ? "Added to favorites." : "Removed from favorites." });
+      toast({
+        title: is_favorite ? "⭐ Added to Favorites" : "💔 Removed from Favorites",
+        description: is_favorite ? "You can find it in your Favorites tab." : "Item unfavorited.",
+        action: (
+          <ToastAction altText="Undo" onClick={async () => {
+            await supabase.from("items").update({ is_favorite: !is_favorite }).eq("id", id);
+            queryClient.invalidateQueries({ queryKey: queryKeys.items });
+          }}>
+            Undo
+          </ToastAction>
+        ),
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
