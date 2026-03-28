@@ -15,6 +15,18 @@ export interface Item {
   is_favorite?: boolean;
   created_at?: string;
   updated_at?: string;
+  // Link Decay
+  link_status?: string;
+  archive_url?: string;
+  last_checked_at?: string;
+  // Time Capsule
+  unlock_date?: string;
+  future_message?: string;
+  is_locked?: boolean;
+  // Context Memory
+  save_reason?: string;
+  // Read tracking
+  is_read?: boolean;
 }
 
 export interface Folder {
