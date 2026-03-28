@@ -73,10 +73,18 @@ const ItemCard = ({
   updatedAt,
   tags = [],
   isFavorite = false,
+  linkStatus,
+  archiveUrl,
+  unlockDate,
+  futureMessage,
+  isLocked = false,
+  saveReason,
+  isRead = false,
   onDelete,
   onMoveToFolder,
   onEdit,
   onToggleFavorite,
+  onMarkRead,
   folders = []
 }: ItemCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
