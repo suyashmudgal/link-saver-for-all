@@ -16,6 +16,7 @@ const Favorites = () => {
   const deleteItem = useDeleteItem();
   const toggleFavorite = useToggleFavorite();
   const moveItem = useMoveItem();
+  const markRead = useMarkItemRead();
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
