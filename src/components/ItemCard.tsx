@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import LinkPreviewCard from "./LinkPreviewCard";
+import LinkStatusBadge from "./LinkStatusBadge";
+import RecallContextButton from "./RecallContextButton";
+import { LockedCapsuleCard, FutureMessageBox, CapsuleBadge } from "./TimeCapsuleCard";
 import { getTagColor } from "./TagInput";
 
 interface Folder {
