@@ -131,6 +131,51 @@ const Insights = () => {
           ))}
         </div>
 
+        {/* Health & Status Cards */}
+        {(stats.deadLinks > 0 || stats.unreadLinks > 0 || stats.capsules > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {stats.deadLinks > 0 && (
+              <Card className="p-4 border-destructive/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-destructive">{stats.deadLinks}</p>
+                    <p className="text-xs text-muted-foreground">Dead Links</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+            {stats.unreadLinks > 0 && (
+              <Card className="p-4 border-primary/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-primary">{stats.unreadLinks}</p>
+                    <p className="text-xs text-muted-foreground">Unread Links</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+            {stats.capsules > 0 && (
+              <Card className="p-4 border-primary/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{stats.capsules}</p>
+                    <p className="text-xs text-muted-foreground">Locked Capsules</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Category Distribution */}
           <Card className="p-6 bg-card border-border/50">
