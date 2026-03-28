@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { BarChart3, Link2, Star, FolderOpen, TrendingUp, Tag, Calendar } from "lucide-react";
+import { BarChart3, Link2, Star, FolderOpen, TrendingUp, Tag, Calendar, AlertTriangle, Lock, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useItems, useFolders } from "@/hooks/use-items";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Badge } from "@/components/ui/badge";
+import LinkStatusBadge from "@/components/LinkStatusBadge";
 
 const CHART_COLORS = [
   "hsl(252 85% 60%)",  // primary purple
