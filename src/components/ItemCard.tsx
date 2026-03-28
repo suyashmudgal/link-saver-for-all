@@ -46,10 +46,18 @@ interface ItemCardProps {
   updatedAt?: string;
   tags?: string[];
   isFavorite?: boolean;
+  linkStatus?: string;
+  archiveUrl?: string;
+  unlockDate?: string;
+  futureMessage?: string;
+  isLocked?: boolean;
+  saveReason?: string;
+  isRead?: boolean;
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
   onEdit?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
+  onMarkRead?: (id: string) => void;
   folders?: Folder[];
 }
 
