@@ -255,6 +255,55 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
             <TagInput tags={tags} onChange={setTags} disabled={createItem.isPending} placeholder="e.g., DSA, Learning, Fun" />
           </div>
 
+          <div className="space-y-2">
+            <Label>Why are you saving this? (Optional)</Label>
+            <Input
+              value={saveReason}
+              onChange={(e) => setSaveReason(e.target.value.slice(0, 150))}
+              placeholder="e.g., Great tutorial for React hooks"
+              disabled={createItem.isPending}
+              maxLength={150}
+            />
+            <p className="text-[10px] text-muted-foreground text-right">{saveReason.length}/150</p>
+          </div>
+
+          {/* Time Capsule */}
+          <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-primary" />
+                <Label className="text-sm font-medium">Make this a Time Capsule</Label>
+              </div>
+              <Switch checked={isCapsule} onCheckedChange={setIsCapsule} disabled={createItem.isPending} />
+            </div>
+            {isCapsule && (
+              <div className="space-y-3 pt-1">
+                <div className="space-y-2">
+                  <Label className="text-xs">Unlock Date</Label>
+                  <Input
+                    type="date"
+                    value={unlockDate}
+                    onChange={(e) => setUnlockDate(e.target.value)}
+                    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                    disabled={createItem.isPending}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Message to future self (Optional)</Label>
+                  <Textarea
+                    value={futureMessage}
+                    onChange={(e) => setFutureMessage(e.target.value.slice(0, 280))}
+                    placeholder="Hey future me, I saved this because..."
+                    disabled={createItem.isPending}
+                    rows={2}
+                    maxLength={280}
+                  />
+                  <p className="text-[10px] text-muted-foreground text-right">{futureMessage.length}/280</p>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={createItem.isPending} className="flex-1">Cancel</Button>
             <Button type="submit" disabled={createItem.isPending || !isFormValid()} className="flex-1 bg-gradient-to-r from-primary to-primary">
