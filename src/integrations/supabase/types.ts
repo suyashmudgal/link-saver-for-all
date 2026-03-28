@@ -67,44 +67,68 @@ export type Database = {
       }
       items: {
         Row: {
+          archive_url: string | null
           content: string
           created_at: string
           description: string | null
           folder_id: string | null
+          future_message: string | null
           id: string
           is_favorite: boolean | null
+          is_locked: boolean | null
+          is_read: boolean | null
+          last_checked_at: string | null
+          link_status: string | null
+          save_reason: string | null
           tags: string[] | null
           thumbnail_url: string | null
           title: string
           type: Database["public"]["Enums"]["item_type"]
+          unlock_date: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          archive_url?: string | null
           content: string
           created_at?: string
           description?: string | null
           folder_id?: string | null
+          future_message?: string | null
           id?: string
           is_favorite?: boolean | null
+          is_locked?: boolean | null
+          is_read?: boolean | null
+          last_checked_at?: string | null
+          link_status?: string | null
+          save_reason?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
           title: string
           type: Database["public"]["Enums"]["item_type"]
+          unlock_date?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          archive_url?: string | null
           content?: string
           created_at?: string
           description?: string | null
           folder_id?: string | null
+          future_message?: string | null
           id?: string
           is_favorite?: boolean | null
+          is_locked?: boolean | null
+          is_read?: boolean | null
+          last_checked_at?: string | null
+          link_status?: string | null
+          save_reason?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
           title?: string
           type?: Database["public"]["Enums"]["item_type"]
+          unlock_date?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -125,32 +149,108 @@ export type Database = {
           },
         ]
       }
+      link_visits: {
+        Row: {
+          id: string
+          link_id: string
+          user_id: string
+          visited_at: string | null
+        }
+        Insert: {
+          id?: string
+          link_id: string
+          user_id: string
+          visited_at?: string | null
+        }
+        Update: {
+          id?: string
+          link_id?: string
+          user_id?: string
+          visited_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_visits_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link_id: string | null
+          message: string
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link_id?: string | null
+          message: string
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link_id?: string | null
+          message?: string
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          digest_opt_out: boolean | null
           full_name: string | null
           id: string
           is_blocked: boolean | null
           last_active_at: string | null
+          last_digest_sent_at: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          digest_opt_out?: boolean | null
           full_name?: string | null
           id: string
           is_blocked?: boolean | null
           last_active_at?: string | null
+          last_digest_sent_at?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          digest_opt_out?: boolean | null
           full_name?: string | null
           id?: string
           is_blocked?: boolean | null
           last_active_at?: string | null
+          last_digest_sent_at?: string | null
           updated_at?: string
         }
         Relationships: []
