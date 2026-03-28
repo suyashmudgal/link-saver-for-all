@@ -53,7 +53,8 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
   const resetForm = () => {
     setTitle(""); setDescription(""); setType("link"); setContent(""); setThumbnailUrl("");
     setFolderId(defaultFolderId || "none"); setInputMode("url"); setUploadedFile(null);
-    setTags([]); setDuplicateWarning(null);
+    setTags([]); setDuplicateWarning(null); setSaveReason(""); setIsCapsule(false);
+    setUnlockDate(""); setFutureMessage("");
     if (filePreviewUrl) { URL.revokeObjectURL(filePreviewUrl); setFilePreviewUrl(null); }
   };
 
