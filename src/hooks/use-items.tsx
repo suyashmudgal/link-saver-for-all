@@ -334,3 +334,20 @@ export const useCheckDuplicate = () => {
     return data && data.length > 0 ? data[0] as Item : null;
   };
 };
+
+// Mark item as read
+export const useMarkItemRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("items").update({ is_read: true }).eq("id", id);
+      if (error) throw error;
+      // Also record the visit
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("link_visits").insert({ link_id: id, user_id: user.id });
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.items }),
+  });
+};
