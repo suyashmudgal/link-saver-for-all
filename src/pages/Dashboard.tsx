@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   useItems, useFolders, useDeleteItem, useDeleteFolder, 
-  useUpdateFolder, useMoveItem, useMoveFolder, useToggleFavorite, Item, Folder
+  useUpdateFolder, useMoveItem, useMoveFolder, useToggleFavorite, useMarkItemRead, Item, Folder
 } from "@/hooks/use-items";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,7 @@ const Dashboard = () => {
   const moveItem = useMoveItem();
   const moveFolder = useMoveFolder();
   const toggleFavorite = useToggleFavorite();
+  const markRead = useMarkItemRead();
 
   const loading = itemsLoading || foldersLoading;
 
@@ -70,6 +71,7 @@ const Dashboard = () => {
     const item = items.find(i => i.id === id);
     if (item) toggleFavorite.mutate({ id, is_favorite: !item.is_favorite });
   };
+  const handleMarkRead = (id: string) => { markRead.mutate(id); };
 
   const handleExportCSV = () => {
     const headers = ["Title", "Type", "URL/Content", "Description", "Tags", "Favorite", "Folder", "Created At"];
@@ -285,9 +287,12 @@ const Dashboard = () => {
                           type={item.type} content={item.content} thumbnailUrl={item.thumbnail_url}
                           folderId={item.folder_id} createdAt={item.created_at} updatedAt={item.updated_at}
                           tags={item.tags} isFavorite={item.is_favorite}
+                          linkStatus={item.link_status} archiveUrl={item.archive_url}
+                          unlockDate={item.unlock_date} futureMessage={item.future_message}
+                          isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                           onDelete={(id) => setDeleteDialog({ type: "item", id })}
                           onMoveToFolder={handleMoveToFolder} onEdit={handleEditItem} folders={folders}
-                          onToggleFavorite={handleToggleFavorite}
+                          onToggleFavorite={handleToggleFavorite} onMarkRead={handleMarkRead}
                         />
                       ))}
                     </div>
@@ -337,9 +342,12 @@ const Dashboard = () => {
                         type={item.type} content={item.content} thumbnailUrl={item.thumbnail_url}
                         folderId={item.folder_id} createdAt={item.created_at} updatedAt={item.updated_at}
                         tags={item.tags} isFavorite={item.is_favorite}
+                        linkStatus={item.link_status} archiveUrl={item.archive_url}
+                        unlockDate={item.unlock_date} futureMessage={item.future_message}
+                        isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                         onDelete={(id) => setDeleteDialog({ type: "item", id })}
                         onMoveToFolder={handleMoveToFolder} onEdit={handleEditItem} folders={folders}
-                        onToggleFavorite={handleToggleFavorite}
+                        onToggleFavorite={handleToggleFavorite} onMarkRead={handleMarkRead}
                       />
                     ))}
                   </div>

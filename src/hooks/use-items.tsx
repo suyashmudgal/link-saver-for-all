@@ -15,6 +15,18 @@ export interface Item {
   is_favorite?: boolean;
   created_at?: string;
   updated_at?: string;
+  // Link Decay
+  link_status?: string;
+  archive_url?: string;
+  last_checked_at?: string;
+  // Time Capsule
+  unlock_date?: string;
+  future_message?: string;
+  is_locked?: boolean;
+  // Context Memory
+  save_reason?: string;
+  // Read tracking
+  is_read?: boolean;
 }
 
 export interface Folder {
@@ -321,4 +333,21 @@ export const useCheckDuplicate = () => {
       .limit(1);
     return data && data.length > 0 ? data[0] as Item : null;
   };
+};
+
+// Mark item as read
+export const useMarkItemRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("items").update({ is_read: true }).eq("id", id);
+      if (error) throw error;
+      // Also record the visit
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("link_visits").insert({ link_id: id, user_id: user.id });
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.items }),
+  });
 };

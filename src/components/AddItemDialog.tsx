@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Loader2, Link2, Upload, AlertTriangle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Loader2, Link2, Upload, AlertTriangle, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateItem, useCheckDuplicate, detectLinkType, Folder } from "@/hooks/use-items";
@@ -41,6 +42,10 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
   const [tags, setTags] = useState<string[]>([]);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [fetchingMeta, setFetchingMeta] = useState(false);
+  const [saveReason, setSaveReason] = useState("");
+  const [isCapsule, setIsCapsule] = useState(false);
+  const [unlockDate, setUnlockDate] = useState("");
+  const [futureMessage, setFutureMessage] = useState("");
   const { toast } = useToast();
   const createItem = useCreateItem();
   const checkDuplicate = useCheckDuplicate();
@@ -48,7 +53,8 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
   const resetForm = () => {
     setTitle(""); setDescription(""); setType("link"); setContent(""); setThumbnailUrl("");
     setFolderId(defaultFolderId || "none"); setInputMode("url"); setUploadedFile(null);
-    setTags([]); setDuplicateWarning(null);
+    setTags([]); setDuplicateWarning(null); setSaveReason(""); setIsCapsule(false);
+    setUnlockDate(""); setFutureMessage("");
     if (filePreviewUrl) { URL.revokeObjectURL(filePreviewUrl); setFilePreviewUrl(null); }
   };
 
@@ -129,7 +135,11 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
       folder_id: folderId === "none" ? undefined : folderId,
       tags,
       is_favorite: false,
-    }, { onSuccess: () => { resetForm(); setOpen(false); } });
+      save_reason: saveReason || undefined,
+      is_locked: isCapsule && unlockDate ? true : false,
+      unlock_date: isCapsule && unlockDate ? new Date(unlockDate).toISOString() : undefined,
+      future_message: isCapsule && futureMessage ? futureMessage : undefined,
+    } as any, { onSuccess: () => { resetForm(); setOpen(false); } });
   };
 
   const isFormValid = () => {
@@ -243,6 +253,55 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
           <div className="space-y-2">
             <Label>Tags</Label>
             <TagInput tags={tags} onChange={setTags} disabled={createItem.isPending} placeholder="e.g., DSA, Learning, Fun" />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Why are you saving this? (Optional)</Label>
+            <Input
+              value={saveReason}
+              onChange={(e) => setSaveReason(e.target.value.slice(0, 150))}
+              placeholder="e.g., Great tutorial for React hooks"
+              disabled={createItem.isPending}
+              maxLength={150}
+            />
+            <p className="text-[10px] text-muted-foreground text-right">{saveReason.length}/150</p>
+          </div>
+
+          {/* Time Capsule */}
+          <div className="space-y-3 p-3 rounded-lg border border-border/50 bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-primary" />
+                <Label className="text-sm font-medium">Make this a Time Capsule</Label>
+              </div>
+              <Switch checked={isCapsule} onCheckedChange={setIsCapsule} disabled={createItem.isPending} />
+            </div>
+            {isCapsule && (
+              <div className="space-y-3 pt-1">
+                <div className="space-y-2">
+                  <Label className="text-xs">Unlock Date</Label>
+                  <Input
+                    type="date"
+                    value={unlockDate}
+                    onChange={(e) => setUnlockDate(e.target.value)}
+                    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                    disabled={createItem.isPending}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Message to future self (Optional)</Label>
+                  <Textarea
+                    value={futureMessage}
+                    onChange={(e) => setFutureMessage(e.target.value.slice(0, 280))}
+                    placeholder="Hey future me, I saved this because..."
+                    disabled={createItem.isPending}
+                    rows={2}
+                    maxLength={280}
+                  />
+                  <p className="text-[10px] text-muted-foreground text-right">{futureMessage.length}/280</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2">

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { BarChart3, Link2, Star, FolderOpen, TrendingUp, Tag, Calendar } from "lucide-react";
+import { BarChart3, Link2, Star, FolderOpen, TrendingUp, Tag, Calendar, AlertTriangle, Lock, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useItems, useFolders } from "@/hooks/use-items";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Badge } from "@/components/ui/badge";
+import LinkStatusBadge from "@/components/LinkStatusBadge";
 
 const CHART_COLORS = [
   "hsl(252 85% 60%)",  // primary purple
@@ -38,6 +39,12 @@ const Insights = () => {
     items.forEach(i => (i.tags || []).forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; }));
     const topTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
+    // Link health
+    const deadLinks = items.filter(i => i.link_status === "dead").length;
+    const aliveLinks = items.filter(i => i.link_status === "alive").length;
+    const unreadLinks = items.filter(i => i.type === "link" && !i.is_read).length;
+    const capsules = items.filter(i => i.is_locked).length;
+
     return {
       total: items.length,
       favorites,
@@ -45,6 +52,10 @@ const Insights = () => {
       mostUsedType: mostUsedType ? mostUsedType[0] : "none",
       typeData: Object.entries(typeMap).map(([name, value]) => ({ name, value })),
       topTags,
+      deadLinks,
+      aliveLinks,
+      unreadLinks,
+      capsules,
     };
   }, [items, folders]);
 
@@ -119,6 +130,51 @@ const Insights = () => {
             </Card>
           ))}
         </div>
+
+        {/* Health & Status Cards */}
+        {(stats.deadLinks > 0 || stats.unreadLinks > 0 || stats.capsules > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {stats.deadLinks > 0 && (
+              <Card className="p-4 border-destructive/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-destructive">{stats.deadLinks}</p>
+                    <p className="text-xs text-muted-foreground">Dead Links</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+            {stats.unreadLinks > 0 && (
+              <Card className="p-4 border-primary/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-primary">{stats.unreadLinks}</p>
+                    <p className="text-xs text-muted-foreground">Unread Links</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+            {stats.capsules > 0 && (
+              <Card className="p-4 border-primary/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{stats.capsules}</p>
+                    <p className="text-xs text-muted-foreground">Locked Capsules</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Category Distribution */}

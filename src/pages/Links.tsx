@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useItems, useFolders, useDeleteItem, useToggleFavorite, useMoveItem, Item } from "@/hooks/use-items";
+import { useItems, useFolders, useDeleteItem, useToggleFavorite, useMoveItem, useMarkItemRead, Item } from "@/hooks/use-items";
 import DashboardLayout from "@/components/DashboardLayout";
 import ItemCard from "@/components/ItemCard";
 import EditItemDialog from "@/components/EditItemDialog";
@@ -18,6 +18,7 @@ const Links = () => {
   const deleteItem = useDeleteItem();
   const toggleFavorite = useToggleFavorite();
   const moveItem = useMoveItem();
+  const markRead = useMarkItemRead();
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -97,10 +98,14 @@ const Links = () => {
                 type={item.type} content={item.content} thumbnailUrl={item.thumbnail_url}
                 folderId={item.folder_id} createdAt={item.created_at} updatedAt={item.updated_at}
                 tags={item.tags} isFavorite={item.is_favorite}
+                linkStatus={item.link_status} archiveUrl={item.archive_url}
+                unlockDate={item.unlock_date} futureMessage={item.future_message}
+                isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                 onDelete={id => setDeleteId(id)}
                 onMoveToFolder={(itemId, folderId) => moveItem.mutate({ itemId, folderId })}
                 onEdit={id => { const item = items.find(i => i.id === id); if (item) setEditItem(item); }}
                 folders={folders} onToggleFavorite={handleToggleFavorite}
+                onMarkRead={id => markRead.mutate(id)}
               />
             ))}
           </div>

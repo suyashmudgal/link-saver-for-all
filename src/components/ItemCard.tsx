@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag } from "lucide-react";
+import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import LinkPreviewCard from "./LinkPreviewCard";
+import LinkStatusBadge from "./LinkStatusBadge";
+import RecallContextButton from "./RecallContextButton";
+import { LockedCapsuleCard, FutureMessageBox, CapsuleBadge } from "./TimeCapsuleCard";
 import { getTagColor } from "./TagInput";
 
 interface Folder {
@@ -43,10 +46,18 @@ interface ItemCardProps {
   updatedAt?: string;
   tags?: string[];
   isFavorite?: boolean;
+  linkStatus?: string;
+  archiveUrl?: string;
+  unlockDate?: string;
+  futureMessage?: string;
+  isLocked?: boolean;
+  saveReason?: string;
+  isRead?: boolean;
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
   onEdit?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
+  onMarkRead?: (id: string) => void;
   folders?: Folder[];
 }
 
@@ -62,10 +73,18 @@ const ItemCard = ({
   updatedAt,
   tags = [],
   isFavorite = false,
+  linkStatus,
+  archiveUrl,
+  unlockDate,
+  futureMessage,
+  isLocked = false,
+  saveReason,
+  isRead = false,
   onDelete,
   onMoveToFolder,
   onEdit,
   onToggleFavorite,
+  onMarkRead,
   folders = []
 }: ItemCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
@@ -538,6 +557,11 @@ const ItemCard = ({
     return null;
   };
 
+  // If locked capsule, render locked card instead
+  if (isLocked && unlockDate) {
+    return <LockedCapsuleCard unlockDate={unlockDate} />;
+  }
+
   return (
     <>
       <motion.div
@@ -547,20 +571,36 @@ const ItemCard = ({
         layout
       >
         <Card 
-          className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/30 cursor-pointer bg-card"
-          onClick={handleClick}
+          className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/30 cursor-pointer bg-card ${
+            !isRead && type === "link" ? "border-l-2 border-l-primary" : ""
+          }`}
+          onClick={(e) => {
+            handleClick();
+            if (type === "link" && onMarkRead && !isRead) {
+              onMarkRead(id);
+            }
+          }}
         >
           {renderThumbnail()}
           
           <div className="p-4">
             <div className="flex items-start justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className={`${getTypeStyles()} flex items-center gap-1.5`}>
                   {getIcon()}
                   <span className="capitalize text-xs">{getDisplayType()}</span>
                 </Badge>
                 {isFavorite && (
                   <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                )}
+                {type === "link" && linkStatus && (
+                  <LinkStatusBadge status={linkStatus} archiveUrl={archiveUrl} compact />
+                )}
+                {!isRead && type === "link" && (
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] gap-1">
+                    <Eye className="w-3 h-3" />
+                    Unread
+                  </Badge>
                 )}
               </div>
               
@@ -597,6 +637,7 @@ const ItemCard = ({
                         e.stopPropagation(); 
                         const url = content.startsWith("http") ? content : `https://${content}`;
                         window.open(url, "_blank", "noopener,noreferrer");
+                        if (onMarkRead && !isRead) onMarkRead(id);
                       }}>
                         <ExternalLink className="w-4 h-4 mr-2" />
                         Open Link
@@ -663,6 +704,18 @@ const ItemCard = ({
               <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{description}</p>
             )}
 
+            {/* Save Reason */}
+            {saveReason && (
+              <p className="text-xs italic text-muted-foreground mb-2">
+                💡 Saved because: {saveReason}
+              </p>
+            )}
+
+            {/* Future Message (unlocked capsule) */}
+            {!isLocked && futureMessage && (
+              <FutureMessageBox message={futureMessage} />
+            )}
+
             {type === "note" && !isFileUpload && (
               <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{content}</p>
             )}
@@ -673,21 +726,32 @@ const ItemCard = ({
               </p>
             )}
 
-            {/* Tags */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {tags.slice(0, 3).map(tag => (
-                  <Badge key={tag} variant="outline" className={`${getTagColor(tag)} text-[10px] py-0 px-1.5`}>
-                    #{tag}
-                  </Badge>
-                ))}
-                {tags.length > 3 && (
-                  <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
-                    +{tags.length - 3}
-                  </Badge>
-                )}
-              </div>
-            )}
+            {/* Tags + Actions row */}
+            <div className="flex items-center justify-between mt-2">
+              {tags.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {tags.slice(0, 3).map(tag => (
+                    <Badge key={tag} variant="outline" className={`${getTagColor(tag)} text-[10px] py-0 px-1.5`}>
+                      #{tag}
+                    </Badge>
+                  ))}
+                  {tags.length > 3 && (
+                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
+                      +{tags.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              ) : <div />}
+              
+              {/* AI Recall button */}
+              {(saveReason || type === "link") && (
+                <RecallContextButton
+                  title={title}
+                  saveReason={saveReason}
+                  savedDate={createdAt}
+                />
+              )}
+            </div>
           </div>
         </Card>
       </motion.div>
