@@ -42,6 +42,10 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
   const [tags, setTags] = useState<string[]>([]);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [fetchingMeta, setFetchingMeta] = useState(false);
+  const [saveReason, setSaveReason] = useState("");
+  const [isCapsule, setIsCapsule] = useState(false);
+  const [unlockDate, setUnlockDate] = useState("");
+  const [futureMessage, setFutureMessage] = useState("");
   const { toast } = useToast();
   const createItem = useCreateItem();
   const checkDuplicate = useCheckDuplicate();
