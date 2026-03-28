@@ -47,6 +47,7 @@ const Dashboard = () => {
   const moveItem = useMoveItem();
   const moveFolder = useMoveFolder();
   const toggleFavorite = useToggleFavorite();
+  const markRead = useMarkItemRead();
 
   const loading = itemsLoading || foldersLoading;
 
