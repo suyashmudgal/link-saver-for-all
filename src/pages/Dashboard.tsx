@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   useItems, useFolders, useDeleteItem, useDeleteFolder, 
-  useUpdateFolder, useMoveItem, useMoveFolder, useToggleFavorite, Item, Folder
+  useUpdateFolder, useMoveItem, useMoveFolder, useToggleFavorite, useMarkItemRead, Item, Folder
 } from "@/hooks/use-items";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
