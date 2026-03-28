@@ -135,7 +135,11 @@ const AddItemDialog = ({ folders = [], defaultFolderId }: AddItemDialogProps) =>
       folder_id: folderId === "none" ? undefined : folderId,
       tags,
       is_favorite: false,
-    }, { onSuccess: () => { resetForm(); setOpen(false); } });
+      save_reason: saveReason || undefined,
+      is_locked: isCapsule && unlockDate ? true : false,
+      unlock_date: isCapsule && unlockDate ? new Date(unlockDate).toISOString() : undefined,
+      future_message: isCapsule && futureMessage ? futureMessage : undefined,
+    } as any, { onSuccess: () => { resetForm(); setOpen(false); } });
   };
 
   const isFormValid = () => {
