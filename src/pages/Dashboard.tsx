@@ -71,6 +71,7 @@ const Dashboard = () => {
     const item = items.find(i => i.id === id);
     if (item) toggleFavorite.mutate({ id, is_favorite: !item.is_favorite });
   };
+  const handleMarkRead = (id: string) => { markRead.mutate(id); };
 
   const handleExportCSV = () => {
     const headers = ["Title", "Type", "URL/Content", "Description", "Tags", "Favorite", "Folder", "Created At"];
