@@ -65,4 +65,4 @@ export const CapsuleBadge = () => (
   </Badge>
 );
 
-export default TimeCapsuleCardProps;
+export default LockedCapsuleCard;

@@ -39,6 +39,12 @@ const Insights = () => {
     items.forEach(i => (i.tags || []).forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; }));
     const topTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
+    // Link health
+    const deadLinks = items.filter(i => i.link_status === "dead").length;
+    const aliveLinks = items.filter(i => i.link_status === "alive").length;
+    const unreadLinks = items.filter(i => i.type === "link" && !i.is_read).length;
+    const capsules = items.filter(i => i.is_locked).length;
+
     return {
       total: items.length,
       favorites,
@@ -46,6 +52,10 @@ const Insights = () => {
       mostUsedType: mostUsedType ? mostUsedType[0] : "none",
       typeData: Object.entries(typeMap).map(([name, value]) => ({ name, value })),
       topTags,
+      deadLinks,
+      aliveLinks,
+      unreadLinks,
+      capsules,
     };
   }, [items, folders]);
 
