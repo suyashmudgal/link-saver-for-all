@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Star, Search } from "lucide-react";
-import { useItems, useFolders, useDeleteItem, useToggleFavorite, useMoveItem, Item } from "@/hooks/use-items";
+import { useItems, useFolders, useDeleteItem, useToggleFavorite, useMoveItem, useMarkItemRead, Item } from "@/hooks/use-items";
 import DashboardLayout from "@/components/DashboardLayout";
 import ItemCard from "@/components/ItemCard";
 import EditItemDialog from "@/components/EditItemDialog";
