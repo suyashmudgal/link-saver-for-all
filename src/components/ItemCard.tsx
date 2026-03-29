@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag, Eye } from "lucide-react";
+import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag, Eye, CheckCircle2, Moon, Flame, ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
