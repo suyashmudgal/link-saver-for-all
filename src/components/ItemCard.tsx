@@ -87,12 +87,19 @@ const ItemCard = ({
   isLocked = false,
   saveReason,
   isRead = false,
+  priority = "normal",
+  snoozedUntil,
   onDelete,
   onMoveToFolder,
   onEdit,
   onToggleFavorite,
   onMarkRead,
-  folders = []
+  onSnooze,
+  onSetPriority,
+  onUnsnooze,
+  folders = [],
+  showSnooze = false,
+  showPriority = false,
 }: ItemCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
