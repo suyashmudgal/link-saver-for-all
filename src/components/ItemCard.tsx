@@ -616,6 +616,12 @@ const ItemCard = ({
                     Unread
                   </Badge>
                 )}
+                {priority === "high" && (
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] gap-1">
+                    <Flame className="w-3 h-3" />
+                    High
+                  </Badge>
+                )}
               </div>
               
               <div className="flex items-center gap-1">
