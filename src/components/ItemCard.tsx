@@ -53,12 +53,19 @@ interface ItemCardProps {
   isLocked?: boolean;
   saveReason?: string;
   isRead?: boolean;
+  priority?: string;
+  snoozedUntil?: string;
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
   onEdit?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   onMarkRead?: (id: string) => void;
+  onSnooze?: (id: string, duration: string) => void;
+  onSetPriority?: (id: string, priority: string) => void;
+  onUnsnooze?: (id: string) => void;
   folders?: Folder[];
+  showSnooze?: boolean;
+  showPriority?: boolean;
 }
 
 const ItemCard = ({ 
