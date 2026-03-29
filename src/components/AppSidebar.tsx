@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Link2, Star, BarChart3, Shield, 
-  LogOut, Sparkles, ChevronLeft, Share2
+  LogOut, Sparkles, ChevronLeft, Share2, BookOpen, Network
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
