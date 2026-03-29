@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag, Eye } from "lucide-react";
+import { Link2, FileText, Image as ImageIcon, Video, Trash2, ExternalLink, MoreVertical, FolderInput, Play, Pause, File, Maximize2, X, Calendar, Clock, Pencil, Star, Tag, Eye, CheckCircle2, Moon, Flame, ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,12 +53,19 @@ interface ItemCardProps {
   isLocked?: boolean;
   saveReason?: string;
   isRead?: boolean;
+  priority?: string;
+  snoozedUntil?: string;
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
   onEdit?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   onMarkRead?: (id: string) => void;
+  onSnooze?: (id: string, duration: string) => void;
+  onSetPriority?: (id: string, priority: string) => void;
+  onUnsnooze?: (id: string) => void;
   folders?: Folder[];
+  showSnooze?: boolean;
+  showPriority?: boolean;
 }
 
 const ItemCard = ({ 
@@ -80,12 +87,19 @@ const ItemCard = ({
   isLocked = false,
   saveReason,
   isRead = false,
+  priority = "normal",
+  snoozedUntil,
   onDelete,
   onMoveToFolder,
   onEdit,
   onToggleFavorite,
   onMarkRead,
-  folders = []
+  onSnooze,
+  onSetPriority,
+  onUnsnooze,
+  folders = [],
+  showSnooze = false,
+  showPriority = false,
 }: ItemCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -602,6 +616,12 @@ const ItemCard = ({
                     Unread
                   </Badge>
                 )}
+                {priority === "high" && (
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] gap-1">
+                    <Flame className="w-3 h-3" />
+                    High
+                  </Badge>
+                )}
               </div>
               
               <div className="flex items-center gap-1">
@@ -685,6 +705,54 @@ const ItemCard = ({
                           ))}
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
+                    )}
+                    {/* Snooze submenu */}
+                    {showSnooze && onSnooze && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                          <Moon className="w-4 h-4 mr-2" />
+                          Snooze
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "1day"); }}>1 Day</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "3days"); }}>3 Days</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "1week"); }}>1 Week</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "1month"); }}>1 Month</DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    )}
+                    {showSnooze && snoozedUntil && onUnsnooze && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUnsnooze(id); }}>
+                        <Clock className="w-4 h-4 mr-2" />
+                        Unsnooze
+                      </DropdownMenuItem>
+                    )}
+                    {/* Priority submenu */}
+                    {showPriority && onSetPriority && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                          <Flame className="w-4 h-4 mr-2" />
+                          Priority
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetPriority(id, "high"); }}>
+                            <ArrowUp className="w-3 h-3 mr-2 text-amber-500" /> High
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetPriority(id, "normal"); }}>
+                            <Minus className="w-3 h-3 mr-2" /> Normal
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetPriority(id, "low"); }}>
+                            <ArrowDown className="w-3 h-3 mr-2 text-muted-foreground" /> Low
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    )}
+                    {/* Mark as Read */}
+                    {onMarkRead && !isRead && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMarkRead(id); }}>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Mark as Read
+                      </DropdownMenuItem>
                     )}
                     <DropdownMenuItem 
                       onClick={(e) => { e.stopPropagation(); onDelete(id); }}

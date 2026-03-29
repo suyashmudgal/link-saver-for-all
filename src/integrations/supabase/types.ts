@@ -79,7 +79,10 @@ export type Database = {
           is_read: boolean | null
           last_checked_at: string | null
           link_status: string | null
+          priority: string | null
+          read_at: string | null
           save_reason: string | null
+          snoozed_until: string | null
           tags: string[] | null
           thumbnail_url: string | null
           title: string
@@ -101,7 +104,10 @@ export type Database = {
           is_read?: boolean | null
           last_checked_at?: string | null
           link_status?: string | null
+          priority?: string | null
+          read_at?: string | null
           save_reason?: string | null
+          snoozed_until?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
           title: string
@@ -123,7 +129,10 @@ export type Database = {
           is_read?: boolean | null
           last_checked_at?: string | null
           link_status?: string | null
+          priority?: string | null
+          read_at?: string | null
           save_reason?: string | null
+          snoozed_until?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
           title?: string

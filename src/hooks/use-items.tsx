@@ -27,6 +27,10 @@ export interface Item {
   save_reason?: string;
   // Read tracking
   is_read?: boolean;
+  // Priority Read Queue
+  snoozed_until?: string;
+  priority?: string;
+  read_at?: string;
 }
 
 export interface Folder {

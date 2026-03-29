@@ -13,6 +13,8 @@ import Insights from "./pages/Insights";
 import Admin from "./pages/Admin";
 import SharedCollections from "./pages/SharedCollections";
 import SharedView from "./pages/SharedView";
+import ReadQueue from "./pages/ReadQueue";
+import KnowledgeMap from "./pages/KnowledgeMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/shared" element={<SharedCollections />} />
             <Route path="/shared/:token" element={<SharedView />} />
+            <Route path="/read-queue" element={<ReadQueue />} />
+            <Route path="/knowledge-map" element={<KnowledgeMap />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
