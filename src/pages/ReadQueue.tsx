@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
-import { BookOpen, Clock, AlertCircle, Filter } from "lucide-react";
+import { BookOpen, Clock } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ItemCard from "@/components/ItemCard";
 import { useItems, useDeleteItem, useToggleFavorite, useMoveItem, useMarkItemRead, useFolders } from "@/hooks/use-items";
-import { useSnoozeItem, useSetPriority } from "@/hooks/use-read-queue";
+import { useSnoozeItem, useSetPriority, useUnsnooze } from "@/hooks/use-read-queue";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
