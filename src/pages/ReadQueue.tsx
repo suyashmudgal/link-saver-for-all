@@ -164,6 +164,9 @@ const ReadQueue = () => {
                       onDelete={(id) => deleteItem.mutate(id)}
                       onToggleFavorite={(id) => toggleFavorite.mutate({ id, is_favorite: !item.is_favorite })}
                       onMarkRead={(id) => markRead.mutate(id)}
+                      onSnooze={(id, duration) => snoozeItem.mutate({ id, duration })}
+                      onSetPriority={(id, p) => setPriority.mutate({ id, priority: p })}
+                      onUnsnooze={(id) => unsnooze.mutate(id)}
                       folders={folders}
                       showSnooze
                       showPriority

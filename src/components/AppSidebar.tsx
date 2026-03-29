@@ -33,7 +33,9 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
   const navItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     { title: "All Links", url: "/links", icon: Link2 },
+    { title: "Read Queue", url: "/read-queue", icon: BookOpen },
     { title: "Favorites", url: "/favorites", icon: Star },
+    { title: "Knowledge Map", url: "/knowledge-map", icon: Network },
     { title: "Insights", url: "/insights", icon: BarChart3 },
     { title: "Shared", url: "/shared", icon: Share2 },
   ];
