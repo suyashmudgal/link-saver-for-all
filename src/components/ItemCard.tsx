@@ -706,6 +706,54 @@ const ItemCard = ({
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
                     )}
+                    {/* Snooze submenu */}
+                    {showSnooze && onSnooze && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                          <Moon className="w-4 h-4 mr-2" />
+                          Snooze
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "1day"); }}>1 Day</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "3days"); }}>3 Days</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "1week"); }}>1 Week</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSnooze(id, "1month"); }}>1 Month</DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    )}
+                    {showSnooze && snoozedUntil && onUnsnooze && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUnsnooze(id); }}>
+                        <Clock className="w-4 h-4 mr-2" />
+                        Unsnooze
+                      </DropdownMenuItem>
+                    )}
+                    {/* Priority submenu */}
+                    {showPriority && onSetPriority && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                          <Flame className="w-4 h-4 mr-2" />
+                          Priority
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetPriority(id, "high"); }}>
+                            <ArrowUp className="w-3 h-3 mr-2 text-amber-500" /> High
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetPriority(id, "normal"); }}>
+                            <Minus className="w-3 h-3 mr-2" /> Normal
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetPriority(id, "low"); }}>
+                            <ArrowDown className="w-3 h-3 mr-2 text-muted-foreground" /> Low
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    )}
+                    {/* Mark as Read */}
+                    {onMarkRead && !isRead && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMarkRead(id); }}>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Mark as Read
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem 
                       onClick={(e) => { e.stopPropagation(); onDelete(id); }}
                       className="text-destructive"
