@@ -13,6 +13,8 @@ import Insights from "./pages/Insights";
 import Admin from "./pages/Admin";
 import SharedCollections from "./pages/SharedCollections";
 import SharedView from "./pages/SharedView";
+import ReadQueue from "./pages/ReadQueue";
+import KnowledgeMap from "./pages/KnowledgeMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
