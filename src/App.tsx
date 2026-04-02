@@ -37,7 +37,7 @@ const App = () => (
             <Route path="/shared" element={<SharedCollections />} />
             <Route path="/shared/:token" element={<SharedView />} />
             <Route path="/read-queue" element={<ReadQueue />} />
-            <Route path="/knowledge-map" element={<KnowledgeMap />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
