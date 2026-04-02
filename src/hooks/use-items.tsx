@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export interface Item {
   id: string;
@@ -46,16 +47,21 @@ export interface Folder {
 
 export const queryKeys = {
   items: ["items"] as const,
+  itemsByUser: (userId?: string) => ["items", userId ?? "anonymous"] as const,
   folders: ["folders"] as const,
   foldersWithCounts: ["folders", "withCounts"] as const,
+  foldersWithCountsByUser: (userId?: string) => ["folders", "withCounts", userId ?? "anonymous"] as const,
 };
 
 export const useItems = () => {
+  const { user, loading: authLoading } = useAuth();
+
   return useQuery({
-    queryKey: queryKeys.items,
+    queryKey: queryKeys.itemsByUser(user?.id),
+    enabled: !!user && !authLoading,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from("items")
         .select("*")
@@ -71,12 +77,15 @@ export const useItems = () => {
 };
 
 export const useFolders = () => {
+  const { user, loading: authLoading } = useAuth();
   const { data: items = [] } = useItems();
+
   return useQuery({
-    queryKey: queryKeys.foldersWithCounts,
+    queryKey: queryKeys.foldersWithCountsByUser(user?.id),
+    enabled: !!user && !authLoading,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from("folders")
         .select("*")
@@ -336,9 +345,13 @@ export const detectLinkType = (url: string): "link" | "video" | "image" | "note"
 // Check for duplicate URL
 export const useCheckDuplicate = () => {
   return async (url: string): Promise<Item | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
     const { data } = await supabase
       .from("items")
       .select("id, title, content")
+      .eq("user_id", user.id)
       .eq("content", url)
       .limit(1);
     return data && data.length > 0 ? data[0] as Item : null;

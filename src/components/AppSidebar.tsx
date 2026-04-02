@@ -5,6 +5,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/use-auth";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -29,6 +30,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const isAdmin = useIsAdmin(userId);
+  const queryClient = useQueryClient();
 
   const navItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -45,7 +47,8 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/");
+    queryClient.clear();
+    navigate("/", { replace: true });
   };
 
   return (
