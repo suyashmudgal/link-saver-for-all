@@ -93,7 +93,7 @@ const Landing = () => {
     {
       name: "Michael Chen",
       role: "Developer",
-      content: "Finally, a clean and fast way to save all my bookmarks and code snippets. The dark mode is perfect for late-night coding sessions.",
+      content: "Finally, a clean and fast way to save all my bookmarks and code snippets. The dark mode is perfect for late-night sessions.",
       avatar: "MC"
     },
     {
