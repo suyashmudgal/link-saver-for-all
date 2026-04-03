@@ -118,7 +118,7 @@ const Landing = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary flex items-center justify-center shadow-lg">
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">DataVault</span>
+              <span className="text-xl font-bold">Info Trunk</span>
             </motion.div>
             
             <motion.div 
