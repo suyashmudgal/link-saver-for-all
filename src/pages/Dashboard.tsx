@@ -305,7 +305,7 @@ const Dashboard = () => {
                     <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
                       <Database className="w-10 h-10 text-primary/60" />
                     </div>
-                    <h2 className="text-2xl font-bold mb-2">🎉 Welcome to Info Trunk!</h2>
+                     <h2 className="text-2xl font-bold mb-2">🎉 Welcome to Info Trunk!</h2>
                     <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                       You have no saved links yet. Start by creating your first folder, then add links, images, videos, or notes.
                     </p>
