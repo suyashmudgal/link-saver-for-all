@@ -313,7 +313,7 @@ const Landing = () => {
               Loved by Users
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              See what our users have to say about their experience with DataVault.
+              See what our users have to say about their experience with Info Trunk.
             </p>
           </motion.div>
 
