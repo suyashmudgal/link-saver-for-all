@@ -60,8 +60,8 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-bold tracking-tight">DataVault</h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Personal Vault</p>
+              <h1 className="text-lg font-bold tracking-tight">Info Trunk</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Link Vault</p>
             </div>
           )}
         </div>

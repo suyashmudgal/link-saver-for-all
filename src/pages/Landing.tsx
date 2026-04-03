@@ -87,19 +87,19 @@ const Landing = () => {
     {
       name: "Sarah Johnson",
       role: "Product Designer",
-      content: "DataVault has completely transformed how I organize my research and inspiration. The folder system is intuitive and powerful.",
+      content: "Info Trunk has completely transformed how I organize my research and inspiration. The folder system is intuitive and powerful.",
       avatar: "SJ"
     },
     {
       name: "Michael Chen",
       role: "Developer",
-      content: "Finally, a clean and fast way to save all my bookmarks and code snippets. The dark mode is perfect for late-night coding sessions.",
+      content: "Finally, a clean and fast way to save all my bookmarks and code snippets. The dark mode is perfect for late-night sessions.",
       avatar: "MC"
     },
     {
       name: "Emily Rodriguez",
       role: "Content Creator",
-      content: "I use DataVault daily to organize all my content ideas and references. It's become an essential part of my workflow.",
+      content: "I use Info Trunk daily to organize all my content ideas and references. It's become an essential part of my workflow.",
       avatar: "ER"
     }
   ];
@@ -118,7 +118,7 @@ const Landing = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary flex items-center justify-center shadow-lg">
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">DataVault</span>
+              <span className="text-xl font-bold">Info Trunk</span>
             </motion.div>
             
             <motion.div 
@@ -160,7 +160,7 @@ const Landing = () => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
             >
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm text-primary font-medium">Your Personal Data Vault</span>
+              <span className="text-sm text-primary font-medium">Your Personal Link Vault</span>
             </motion.div>
 
             <h1 
@@ -313,7 +313,7 @@ const Landing = () => {
               Loved by Users
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              See what our users have to say about their experience with DataVault.
+              See what our users have to say about their experience with Info Trunk.
             </p>
           </motion.div>
 
@@ -367,7 +367,7 @@ const Landing = () => {
                 Ready to Get Organized?
               </h2>
               <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">
-                Join thousands of users who trust DataVault to organize their digital life. 
+                Join thousands of users who trust Info Trunk to organize their digital life. 
                 Start for free today.
               </p>
               <Link to="/auth?signup=true">
@@ -389,10 +389,10 @@ const Landing = () => {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold">DataVault</span>
+              <span className="font-semibold">Info Trunk</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 DataVault. All rights reserved.
+              © {new Date().getFullYear()} Info Trunk. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <ThemeToggle />
