@@ -87,7 +87,7 @@ const Landing = () => {
     {
       name: "Sarah Johnson",
       role: "Product Designer",
-      content: "DataVault has completely transformed how I organize my research and inspiration. The folder system is intuitive and powerful.",
+      content: "Info Trunk has completely transformed how I organize my research and inspiration. The folder system is intuitive and powerful.",
       avatar: "SJ"
     },
     {
