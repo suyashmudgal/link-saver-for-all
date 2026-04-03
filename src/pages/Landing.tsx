@@ -389,7 +389,7 @@ const Landing = () => {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold">DataVault</span>
+              <span className="font-semibold">Info Trunk</span>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2024 DataVault. All rights reserved.
