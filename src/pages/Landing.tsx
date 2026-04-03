@@ -367,7 +367,7 @@ const Landing = () => {
                 Ready to Get Organized?
               </h2>
               <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">
-                Join thousands of users who trust DataVault to organize their digital life. 
+                Join thousands of users who trust Info Trunk to organize their digital life. 
                 Start for free today.
               </p>
               <Link to="/auth?signup=true">
