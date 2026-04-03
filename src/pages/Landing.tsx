@@ -99,7 +99,7 @@ const Landing = () => {
     {
       name: "Emily Rodriguez",
       role: "Content Creator",
-      content: "I use DataVault daily to organize all my content ideas and references. It's become an essential part of my workflow.",
+      content: "I use Info Trunk daily to organize all my content ideas and references. It's become an essential part of my workflow.",
       avatar: "ER"
     }
   ];
