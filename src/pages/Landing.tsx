@@ -392,7 +392,7 @@ const Landing = () => {
               <span className="font-semibold">Info Trunk</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 DataVault. All rights reserved.
+              © {new Date().getFullYear()} Info Trunk. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <ThemeToggle />
