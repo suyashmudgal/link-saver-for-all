@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Link2, Star, BarChart3, Shield, 
-  LogOut, Sparkles, ChevronLeft, Share2, BookOpen
+  LogOut, Sparkles, ChevronLeft, Share2, BookOpen, Settings
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     { title: "Favorites", url: "/favorites", icon: Star },
     { title: "Insights", url: "/insights", icon: BarChart3 },
     { title: "Shared", url: "/shared", icon: Share2 },
+    { title: "Settings", url: "/settings", icon: Settings },
   ];
 
   if (isAdmin) {

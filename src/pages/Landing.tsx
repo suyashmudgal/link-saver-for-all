@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
+import { lazy, Suspense } from "react";
+
+const HeroScene = lazy(() => import("@/components/HeroScene"));
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -142,8 +145,12 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden">
+        {/* 3D Background */}
+        <Suspense fallback={null}>
+          <HeroScene />
+        </Suspense>
+        {/* Fallback glow effects */}
+        <div className="absolute inset-0 overflow-hidden -z-20">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
         </div>
