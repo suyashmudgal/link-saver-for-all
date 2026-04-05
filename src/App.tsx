@@ -18,6 +18,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const SharedCollections = lazy(() => import("./pages/SharedCollections"));
 const SharedView = lazy(() => import("./pages/SharedView"));
 const ReadQueue = lazy(() => import("./pages/ReadQueue"));
+const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
