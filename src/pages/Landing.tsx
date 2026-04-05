@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
+import { lazy, Suspense } from "react";
+
+const HeroScene = lazy(() => import("@/components/HeroScene"));
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
