@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Link2, Star, BarChart3, Shield,
+  LayoutDashboard, Link2, Star, BarChart3, Shield, Target,
   LogOut, ChevronLeft, Share2, BookOpen, Settings
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
