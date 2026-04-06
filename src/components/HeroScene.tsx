@@ -119,7 +119,6 @@ const HeroScene = () => (
 );
 
 export default HeroScene;
-import { Float, MeshDistortMaterial, MeshWobbleMaterial, Trail } from "@react-three/drei";
 import * as THREE from "three";
 
 /* ── Torus Knot that spins and glows ── */
