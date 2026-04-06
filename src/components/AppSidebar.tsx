@@ -1,6 +1,6 @@
-import { 
-  LayoutDashboard, Link2, Star, BarChart3, Shield, 
-  LogOut, Sparkles, ChevronLeft, Share2, BookOpen, Settings
+import {
+  LayoutDashboard, Link2, Star, BarChart3, Shield,
+  LogOut, ChevronLeft, Share2, BookOpen, Settings
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,21 +8,12 @@ import { useIsAdmin } from "@/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  SidebarHeader,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarFooter, SidebarHeader, useSidebar,
 } from "@/components/ui/sidebar";
 
-interface AppSidebarProps {
-  userId?: string;
-}
+interface AppSidebarProps { userId?: string; }
 
 const AppSidebar = ({ userId }: AppSidebarProps) => {
   const location = useLocation();
@@ -41,10 +32,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     { title: "Shared", url: "/shared", icon: Share2 },
     { title: "Settings", url: "/settings", icon: Settings },
   ];
-
-  if (isAdmin) {
-    navItems.push({ title: "Admin", url: "/admin", icon: Shield });
-  }
+  if (isAdmin) navItems.push({ title: "Admin", url: "/admin", icon: Shield });
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -56,12 +44,10 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shrink-0" style={{ boxShadow: '0 4px 14px hsl(var(--primary) / 0.35)' }}>
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src="/logo.png" alt="Info Trunk" width={36} height={36} className="rounded-xl shrink-0" />
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-bold tracking-tight">Info Trunk</h1>
+              <h1 className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Info Trunk</h1>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Link Vault</p>
             </div>
           )}
@@ -81,8 +67,8 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
                       isActive={isActive}
                       tooltip={item.title}
                       className={`transition-all duration-200 ${
-                        isActive 
-                          ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" 
+                        isActive
+                          ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
                           : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
                       }`}
                     >
@@ -98,11 +84,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-        >
+        <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground">
           <LogOut className="w-4 h-4" />
           {!collapsed && <span>Sign Out</span>}
         </Button>
