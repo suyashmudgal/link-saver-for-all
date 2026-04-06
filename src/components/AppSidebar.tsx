@@ -30,6 +30,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     { title: "Favorites", url: "/favorites", icon: Star },
     { title: "Insights", url: "/insights", icon: BarChart3 },
     { title: "Shared", url: "/shared", icon: Share2 },
+    { title: "Target", url: "/target", icon: Target },
     { title: "Settings", url: "/settings", icon: Settings },
   ];
   if (isAdmin) navItems.push({ title: "Admin", url: "/admin", icon: Shield });

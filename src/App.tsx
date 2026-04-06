@@ -64,6 +64,7 @@ const App = () => (
               <Route path="/shared/:token" element={<SharedView />} />
               <Route path="/read-queue" element={<ReadQueue />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/target" element={<Target />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
