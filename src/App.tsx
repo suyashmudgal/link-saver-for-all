@@ -19,6 +19,7 @@ const SharedCollections = lazy(() => import("./pages/SharedCollections"));
 const SharedView = lazy(() => import("./pages/SharedView"));
 const ReadQueue = lazy(() => import("./pages/ReadQueue"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Target = lazy(() => import("./pages/Target"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/shared/:token" element={<SharedView />} />
               <Route path="/read-queue" element={<ReadQueue />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/target" element={<Target />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

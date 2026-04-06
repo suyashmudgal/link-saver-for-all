@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Link2, Star, BarChart3, Shield,
+  LayoutDashboard, Link2, Star, BarChart3, Shield, Target,
   LogOut, ChevronLeft, Share2, BookOpen, Settings
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -30,6 +30,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     { title: "Favorites", url: "/favorites", icon: Star },
     { title: "Insights", url: "/insights", icon: BarChart3 },
     { title: "Shared", url: "/shared", icon: Share2 },
+    { title: "Target", url: "/target", icon: Target },
     { title: "Settings", url: "/settings", icon: Settings },
   ];
   if (isAdmin) navItems.push({ title: "Admin", url: "/admin", icon: Shield });
