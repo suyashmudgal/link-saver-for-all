@@ -119,9 +119,6 @@ const HeroScene = () => (
 );
 
 export default HeroScene;
-import * as THREE from "three";
-
-/* ── Torus Knot that spins and glows ── */
 const GlowingKnot = () => {
   const ref = useRef<THREE.Mesh>(null);
   useFrame((state) => {
