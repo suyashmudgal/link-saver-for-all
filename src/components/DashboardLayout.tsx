@@ -27,7 +27,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <SidebarProvider>
         <Suspense fallback={null}><BackgroundScene /></Suspense>
-        <div className="min-h-screen flex w-full bg-background">
+        <div className="min-h-screen flex w-full">
         <AppSidebar userId={user?.id} />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center justify-between px-4 border-b border-border/50 glass sticky top-0 z-40">
