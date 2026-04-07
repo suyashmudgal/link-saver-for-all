@@ -1,27 +1,28 @@
-import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Target, CheckCircle2, Circle, Flame, Trophy, Zap, AlertTriangle } from "lucide-react";
+import { useState, useEffect, Suspense, lazy } from "react";
+import { motion } from "framer-motion";
+import { Target, Flame, Trophy, Zap, AlertTriangle, RotateCcw } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import TargetSection from "@/components/target/TargetSection";
+import AddCustomTargetDialog from "@/components/target/AddCustomTargetDialog";
+import { toast } from "sonner";
 
-interface TaskItem {
-  id: string;
-  label: string;
-}
+const TargetScene = lazy(() => import("@/components/target/TargetScene"));
 
-interface Section {
-  title: string;
-  emoji: string;
-  color: string;
-  tasks: TaskItem[];
-}
+interface TaskItem { id: string; label: string; }
+interface Section { title: string; emoji: string; color: string; tasks: TaskItem[]; }
 
 const STORAGE_KEY = "infotrunk-target-challenge";
+const CUSTOM_SECTIONS_KEY = "infotrunk-target-custom-sections";
 
-const sections: Section[] = [
+const defaultSections: Section[] = [
   {
-    title: "DSA (Mandatory)",
-    emoji: "🧠",
+    title: "DSA (Mandatory)", emoji: "🧠",
     color: "from-red-500/20 to-orange-500/20 border-red-500/30",
     tasks: [
       { id: "dsa-1", label: "Last Occurrence Of A Char" },
@@ -41,8 +42,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: "Aptitude",
-    emoji: "📐",
+    title: "Aptitude", emoji: "📐",
     color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30",
     tasks: [
       { id: "apt-1", label: "Mensuration" },
@@ -55,16 +55,12 @@ const sections: Section[] = [
     ],
   },
   {
-    title: "English",
-    emoji: "📖",
+    title: "English", emoji: "📖",
     color: "from-emerald-500/20 to-green-500/20 border-emerald-500/30",
-    tasks: [
-      { id: "eng-1", label: "Watch 1 English video daily (Total 7 days)" },
-    ],
+    tasks: [{ id: "eng-1", label: "Watch 1 English video daily (Total 7 days)" }],
   },
   {
-    title: "Deep Learning",
-    emoji: "🤖",
+    title: "Deep Learning", emoji: "🤖",
     color: "from-purple-500/20 to-violet-500/20 border-purple-500/30",
     tasks: [
       { id: "dl-1", label: "Vanishing Gradient Problem & Sigmoid" },
@@ -82,8 +78,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: "Python Revision",
-    emoji: "🐍",
+    title: "Python Revision", emoji: "🐍",
     color: "from-yellow-500/20 to-amber-500/20 border-yellow-500/30",
     tasks: [
       { id: "py-1", label: "Variables, Data Types" },
@@ -101,8 +96,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: "SQL",
-    emoji: "🗃️",
+    title: "SQL", emoji: "🗃️",
     color: "from-sky-500/20 to-indigo-500/20 border-sky-500/30",
     tasks: [
       { id: "sql-1", label: "SELECT, WHERE, ORDER BY, LIMIT" },
@@ -116,52 +110,104 @@ const sections: Section[] = [
   },
 ];
 
-const allTasks = sections.flatMap((s) => s.tasks);
-const totalTasks = allTasks.length;
-
 const TargetPage = () => {
   const [completed, setCompleted] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch {
-      return new Set();
-    }
+    } catch { return new Set(); }
+  });
+
+  const [customSections, setCustomSections] = useState<Section[]>(() => {
+    try {
+      const saved = localStorage.getItem(CUSTOM_SECTIONS_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
   });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
   }, [completed]);
 
+  useEffect(() => {
+    localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(customSections));
+  }, [customSections]);
+
+  const allSections = [...defaultSections, ...customSections];
+  const totalTasks = allSections.flatMap((s) => s.tasks).length;
+  const completedCount = allSections.flatMap((s) => s.tasks).filter((t) => completed.has(t.id)).length;
+  const progress = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+
   const toggle = (id: string) => {
     setCompleted((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   };
 
-  const completedCount = completed.size;
-  const progress = Math.round((completedCount / totalTasks) * 100);
+  const resetProgress = () => {
+    setCompleted(new Set());
+    toast.success("Progress reset! Fresh start 💪");
+  };
+
+  const addCustomSection = (section: Section) => {
+    setCustomSections((prev) => [...prev, section]);
+  };
+
+  const deleteCustomSection = (idx: number) => {
+    const section = customSections[idx];
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      section.tasks.forEach((t) => next.delete(t.id));
+      return next;
+    });
+    setCustomSections((prev) => prev.filter((_, i) => i !== idx));
+    toast.success("Section removed");
+  };
 
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {/* 3D Scene */}
+        <Suspense fallback={<div className="w-full h-32 md:h-40 rounded-2xl bg-muted/30 animate-pulse" />}>
+          <TargetScene />
+        </Suspense>
+
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg">
-              <Target className="w-6 h-6 text-primary-foreground" />
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg">
+                <Target className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">7 Days Challenge</h1>
+                <p className="text-sm text-muted-foreground">No excuses. Just execution.</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">7 Days Challenge</h1>
-              <p className="text-sm text-muted-foreground">No excuses. Just execution.</p>
-            </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset all progress?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will uncheck every task across all sections. Your custom target sections will remain, only progress is cleared. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={resetProgress} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Yes, Reset Everything
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* Warning Message */}
@@ -170,38 +216,23 @@ const TargetPage = () => {
               <AlertTriangle className="w-6 h-6 text-yellow-500 shrink-0 mt-0.5" />
               <div className="space-y-2 text-sm md:text-base leading-relaxed">
                 <p className="font-bold text-foreground">Bhai sun dhyaan se ⚠️</p>
-                <p className="text-muted-foreground">
-                  Tu already kaafi time waste kar chuka hai. Aise hi chalta raha na toh life mein kuch achieve karna mushkil ho jayega.
-                </p>
-                <p className="text-muted-foreground">
-                  Free Fire aur faltu distractions band kar de 🎮❌
-                </p>
-                <p className="text-muted-foreground">
-                  Ab serious hone ka time aa gaya hai.
-                </p>
-                <p className="font-semibold text-foreground mt-3">
-                  Yeh tera 7 din ka challenge hai — no excuses ⚡
-                </p>
+                <p className="text-muted-foreground">Tu already kaafi time waste kar chuka hai. Aise hi chalta raha na toh life mein kuch achieve karna mushkil ho jayega.</p>
+                <p className="text-muted-foreground">Free Fire aur faltu distractions band kar de 🎮❌</p>
+                <p className="text-muted-foreground">Ab serious hone ka time aa gaya hai.</p>
+                <p className="font-semibold text-foreground mt-3">Yeh tera 7 din ka challenge hai — no excuses ⚡</p>
               </div>
             </div>
           </div>
         </motion.div>
 
         {/* Progress Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 rounded-2xl border border-border bg-card p-5"
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8 rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-500" />
               <span className="font-semibold text-sm">Progress</span>
             </div>
-            <span className="text-sm font-bold text-primary">
-              {completedCount} / {totalTasks} completed
-            </span>
+            <span className="text-sm font-bold text-primary">{completedCount} / {totalTasks} completed</span>
           </div>
           <Progress value={progress} className="h-3 rounded-full" />
           <div className="flex items-center justify-between mt-2">
@@ -216,69 +247,31 @@ const TargetPage = () => {
 
         {/* Sections */}
         <div className="space-y-6">
-          {sections.map((section, sIdx) => {
-            const sectionDone = section.tasks.filter((t) => completed.has(t.id)).length;
-            const sectionTotal = section.tasks.length;
-            const sectionComplete = sectionDone === sectionTotal;
+          {defaultSections.map((section, idx) => (
+            <TargetSection key={section.title} section={section} index={idx} completed={completed} onToggle={toggle} />
+          ))}
 
-            return (
-              <motion.div
-                key={section.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * sIdx }}
-                className={`rounded-2xl border bg-gradient-to-br ${section.color} bg-card p-5`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{section.emoji}</span>
-                    <h2 className="text-lg font-bold">{section.title}</h2>
-                    {sectionComplete && <CheckCircle2 className="w-5 h-5 text-accent" />}
-                  </div>
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-background/60 text-muted-foreground">
-                    {sectionDone}/{sectionTotal}
-                  </span>
-                </div>
+          {customSections.map((section, idx) => (
+            <TargetSection
+              key={`custom-${idx}`}
+              section={section}
+              index={defaultSections.length + idx}
+              completed={completed}
+              onToggle={toggle}
+              isCustom
+              onDeleteSection={() => deleteCustomSection(idx)}
+            />
+          ))}
+        </div>
 
-                <div className="space-y-1">
-                  {section.tasks.map((task) => {
-                    const done = completed.has(task.id);
-                    return (
-                      <button
-                        key={task.id}
-                        onClick={() => toggle(task.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 group ${
-                          done
-                            ? "bg-accent/10 text-muted-foreground"
-                            : "hover:bg-background/50"
-                        }`}
-                      >
-                        {done ? (
-                          <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
-                        ) : (
-                          <Circle className="w-5 h-5 text-muted-foreground/40 shrink-0 group-hover:text-primary transition-colors" />
-                        )}
-                        <span
-                          className={`text-sm transition-all ${
-                            done ? "line-through opacity-60" : "text-foreground"
-                          }`}
-                        >
-                          {task.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            );
-          })}
+        {/* Add Custom Target */}
+        <div className="mt-6 flex justify-center">
+          <AddCustomTargetDialog onAddSection={addCustomSection} />
         </div>
 
         {/* Bottom Motivation */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           className="mt-10 mb-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5 p-6 text-center"
         >
           <Zap className="w-8 h-8 text-primary mx-auto mb-3" />
