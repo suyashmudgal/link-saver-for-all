@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { z } from "zod";
 import { motion } from "framer-motion";
 import ThemeToggle from "@/components/ThemeToggle";
 import PasswordStrength from "@/components/PasswordStrength";
+
+const BackgroundScene = lazy(() => import("@/components/BackgroundScene"));
 
 const authSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -184,6 +186,7 @@ const Auth = () => {
   if (forgotPassword) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden">
+        <Suspense fallback={null}><BackgroundScene /></Suspense>
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -259,6 +262,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden">
+      <Suspense fallback={null}><BackgroundScene /></Suspense>
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
