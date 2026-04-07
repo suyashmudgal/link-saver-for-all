@@ -1,10 +1,12 @@
-import { ReactNode } from "react";
+import { ReactNode, lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { useAuth } from "@/hooks/use-auth";
+
+const BackgroundScene = lazy(() => import("@/components/BackgroundScene"));
 
 interface DashboardLayoutProps { children: ReactNode; }
 
@@ -24,7 +26,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+        <Suspense fallback={null}><BackgroundScene /></Suspense>
+        <div className="min-h-screen flex w-full bg-background">
         <AppSidebar userId={user?.id} />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center justify-between px-4 border-b border-border/50 glass sticky top-0 z-40">
