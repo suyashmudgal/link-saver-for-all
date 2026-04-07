@@ -10,6 +10,7 @@ import { lazy, Suspense } from "react";
 import logoImg from "/logo.png";
 
 const HeroScene = lazy(() => import("@/components/HeroScene"));
+const BackgroundScene = lazy(() => import("@/components/BackgroundScene"));
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -41,6 +42,7 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <Suspense fallback={null}><BackgroundScene /></Suspense>
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
