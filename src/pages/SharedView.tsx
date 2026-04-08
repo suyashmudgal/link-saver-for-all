@@ -108,7 +108,7 @@ const SharedView = () => {
         {/* Footer */}
         <div className="mt-12 pt-6 border-t text-center">
           <p className="text-sm text-muted-foreground">
-            Powered by <span className="font-semibold text-foreground">DataVault</span>
+            Powered by <span className="font-semibold text-foreground">Info Trunk</span>
           </p>
         </div>
       </div>
