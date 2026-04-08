@@ -67,12 +67,14 @@ export const useCreateSharedCollection = () => {
       }
       return collection;
     },
-    onSuccess: () => {
+    onSuccess: (collection) => {
       qc.invalidateQueries({ queryKey: ["shared_collections"] });
-      toast({ title: "Collection created!", description: "Your shareable link is ready." });
+      const shareUrl = `${window.location.origin}/shared/${collection.share_token}`;
+      navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Collection created!", description: "Share link copied to clipboard." });
     },
     onError: (e: Error) => {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      toast({ title: "Error creating collection", description: e.message, variant: "destructive" });
     },
   });
 };

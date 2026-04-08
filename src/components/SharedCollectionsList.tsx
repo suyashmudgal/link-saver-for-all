@@ -52,7 +52,7 @@ const SharedCollectionsList = () => {
     <>
       <div className="space-y-3">
         {collections.map((c) => (
-          <Card key={c.id} className="p-4">
+          <Card key={c.id} className="p-4 hover-lift">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">

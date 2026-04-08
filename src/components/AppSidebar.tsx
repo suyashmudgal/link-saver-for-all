@@ -42,7 +42,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/40 bg-sidebar-background/70 backdrop-blur-xl">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="Info Trunk" width={36} height={36} className="rounded-xl shrink-0" />
