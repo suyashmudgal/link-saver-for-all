@@ -49,7 +49,7 @@ function CoreShape() {
     <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.5}>
       <mesh ref={ref}>
         <icosahedronGeometry args={[1, 1]} />
-        <MeshDistortMaterial color="#1e40af" emissive="#1e40af" emissiveIntensity={0.3} distort={0.25} speed={2} roughness={0.15} metalness={0.9} wireframe />
+        <MeshDistortMaterial color="#7c3aed" emissive="#7c3aed" emissiveIntensity={0.3} distort={0.25} speed={2} roughness={0.15} metalness={0.9} wireframe />
       </mesh>
     </Float>
   );
@@ -76,7 +76,7 @@ function Particles() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.03} color="#60a5fa" transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial size={0.03} color="#a78bfa" transparent opacity={0.6} sizeAttenuation />
     </points>
   );
 }
@@ -95,16 +95,16 @@ const HeroScene = () => (
   <div className="absolute inset-0 -z-10 opacity-70">
     <Canvas camera={{ position: [0, 0, 6], fov: 50 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }}>
       <ambientLight intensity={0.4} />
-      <pointLight position={[5, 5, 5]} intensity={1} color="#3b82f6" />
+      <pointLight position={[5, 5, 5]} intensity={1} color="#8b5cf6" />
       <pointLight position={[-5, -3, 3]} intensity={0.6} color="#06b6d4" />
       <CoreShape />
-      <OrbitRing radius={2} speed={0.5} color="#3b82f6" />
+      <OrbitRing radius={2} speed={0.5} color="#8b5cf6" />
       <OrbitRing radius={2.5} speed={-0.35} color="#06b6d4" />
-      <OrbitRing radius={1.8} speed={0.7} color="#818cf8" />
-      <NetworkNode position={[-2.5, 1.5, -1]} color="#3b82f6" size={0.12} />
+      <OrbitRing radius={1.8} speed={0.7} color="#c084fc" />
+      <NetworkNode position={[-2.5, 1.5, -1]} color="#8b5cf6" size={0.12} />
       <NetworkNode position={[2.8, -1, 0.5]} color="#06b6d4" size={0.1} />
-      <NetworkNode position={[-1.5, -2, 1]} color="#818cf8" size={0.14} />
-      <NetworkNode position={[1.5, 2.2, -0.5]} color="#60a5fa" size={0.11} />
+      <NetworkNode position={[-1.5, -2, 1]} color="#c084fc" size={0.14} />
+      <NetworkNode position={[1.5, 2.2, -0.5]} color="#a78bfa" size={0.11} />
       <Particles />
       <CameraRig />
     </Canvas>

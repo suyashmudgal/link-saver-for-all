@@ -1,4 +1,4 @@
-import { FolderOpen, ChevronRight, MoreVertical, Edit2, Trash2, MoveRight } from "lucide-react";
+import { FolderOpen, ChevronRight, MoreVertical, Edit2, Trash2, MoveRight, Share2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,10 +30,10 @@ interface FolderCardProps {
   onRename: () => void;
   onDelete: () => void;
   onMove?: (folderId: string, newParentId: string | null) => void;
+  onShare?: (folderId: string) => void;
 }
 
-const FolderCard = ({ folder, allFolders = [], onClick, onRename, onDelete, onMove }: FolderCardProps) => {
-  // Get valid move targets: exclude self, current parent, and descendants
+const FolderCard = ({ folder, allFolders = [], onClick, onRename, onDelete, onMove, onShare }: FolderCardProps) => {
   const getDescendantIds = (id: string): string[] => {
     const children = allFolders.filter(f => f.parent_id === id);
     return [id, ...children.flatMap(c => getDescendantIds(c.id))];
@@ -47,29 +47,29 @@ const FolderCard = ({ folder, allFolders = [], onClick, onRename, onDelete, onMo
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ scale: 1.02, y: -2 }}
+      whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.2 }}
     >
       <Card 
-        className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg border-border/50 hover:border-primary/30 gradient-border"
+        className="group relative overflow-hidden cursor-pointer hover-lift gradient-border"
         onClick={onClick}
       >
         <div 
-          className="h-1.5 w-full"
+          className="h-1 w-full"
           style={{ background: `linear-gradient(90deg, ${folder.color}, ${folder.color}88)` }}
         />
         <div 
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03] rounded-xl"
           style={{ backgroundColor: folder.color }}
         />
         
         <div className="relative p-5">
           <div className="flex items-start justify-between">
             <div 
-              className="w-11 h-11 rounded-xl flex items-center justify-center mb-3 shadow-sm"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
               style={{ 
-                backgroundColor: `${folder.color}18`,
-                boxShadow: `0 2px 8px ${folder.color}15`
+                backgroundColor: `${folder.color}15`,
+                boxShadow: `0 4px 12px ${folder.color}20`
               }}
             >
               <FolderOpen className="w-5 h-5" style={{ color: folder.color }} />
@@ -90,6 +90,12 @@ const FolderCard = ({ folder, allFolders = [], onClick, onRename, onDelete, onMo
                   <Edit2 className="w-4 h-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
+                {onShare && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(folder.id); }}>
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Folder
+                  </DropdownMenuItem>
+                )}
                 {onMove && (moveTargets.length > 0 || canMoveToRoot) && (
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
