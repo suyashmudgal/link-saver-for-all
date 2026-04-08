@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Link2, Star, BarChart3, Shield, Target,
-  LogOut, ChevronLeft, Share2, BookOpen, Settings
+  LogOut, Share2, BookOpen, Settings
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,14 +42,16 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/40 bg-sidebar-background/70 backdrop-blur-xl">
+    <Sidebar collapsible="icon" className="border-r border-border/30 bg-sidebar/80 backdrop-blur-2xl">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Info Trunk" width={36} height={36} className="rounded-xl shrink-0" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-foreground/20 flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+            <img src="/logo.png" alt="Info Trunk" width={28} height={28} className="rounded-lg" />
+          </div>
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Info Trunk</h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Link Vault</p>
+              <h1 className="text-base font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Info Trunk</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Link Vault</p>
             </div>
           )}
         </div>
@@ -67,13 +69,13 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
                       onClick={() => navigate(item.url)}
                       isActive={isActive}
                       tooltip={item.title}
-                      className={`transition-all duration-200 ${
+                      className={`transition-all duration-200 rounded-xl ${
                         isActive
-                          ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
-                          : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                          ? "bg-primary/10 text-primary font-medium shadow-sm"
+                          : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-[18px] h-[18px]" />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -85,7 +87,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground rounded-xl">
           <LogOut className="w-4 h-4" />
           {!collapsed && <span>Sign Out</span>}
         </Button>
