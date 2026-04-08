@@ -4,10 +4,10 @@ import {
   useItems, useFolders, useDeleteItem, useDeleteFolder, 
   useUpdateFolder, useMoveItem, useMoveFolder, useToggleFavorite, useMarkItemRead, Item, Folder
 } from "@/hooks/use-items";
+import { useCreateSharedCollection } from "@/hooks/use-shared-collections";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -26,9 +26,11 @@ import CreateFolderDialog from "@/components/CreateFolderDialog";
 import EditItemDialog from "@/components/EditItemDialog";
 import CreateShareDialog from "@/components/CreateShareDialog";
 import SearchFilters, { SearchFiltersState } from "@/components/SearchFilters";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ type: "folder" | "item"; id: string } | null>(null);
   const [renameDialog, setRenameDialog] = useState<Folder | null>(null);
@@ -39,7 +41,7 @@ const Dashboard = () => {
     query: "", types: [], dateRange: "all", favoritesOnly: false, tags: [],
   });
 
-  const { data: items = [], isLoading: itemsLoading, isFetching: itemsFetching } = useItems();
+  const { data: items = [], isLoading: itemsLoading } = useItems();
   const { data: folders = [], isLoading: foldersLoading } = useFolders();
   const deleteItem = useDeleteItem();
   const deleteFolder = useDeleteFolder();
@@ -48,6 +50,7 @@ const Dashboard = () => {
   const moveFolder = useMoveFolder();
   const toggleFavorite = useToggleFavorite();
   const markRead = useMarkItemRead();
+  const createCollection = useCreateSharedCollection();
 
   const loading = itemsLoading || foldersLoading;
 
@@ -73,29 +76,39 @@ const Dashboard = () => {
   };
   const handleMarkRead = (id: string) => { markRead.mutate(id); };
 
+  const handleShareFolder = async (folderId: string) => {
+    if (!user) return;
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    const folderItems = items.filter(i => i.folder_id === folderId);
+    if (folderItems.length === 0) {
+      toast({ title: "Empty Folder", description: "This folder has no items to share.", variant: "destructive" });
+      return;
+    }
+    await createCollection.mutateAsync({
+      title: `📁 ${folder.name}`,
+      description: `Shared folder: ${folder.name}`,
+      item_ids: folderItems.map(i => i.id),
+      user_id: user.id,
+    });
+  };
+
   const handleExportCSV = () => {
     const headers = ["Title", "Type", "URL/Content", "Description", "Tags", "Favorite", "Folder", "Created At"];
     const rows = items.map(item => {
       const folder = folders.find(f => f.id === item.folder_id);
       return [
-        item.title,
-        item.type,
-        item.content,
-        item.description || "",
-        (item.tags || []).join("; "),
-        item.is_favorite ? "Yes" : "No",
-        folder?.name || "",
-        new Date(item.created_at).toLocaleDateString(),
+        item.title, item.type, item.content, item.description || "",
+        (item.tags || []).join("; "), item.is_favorite ? "Yes" : "No",
+        folder?.name || "", new Date(item.created_at).toLocaleDateString(),
       ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(",");
     });
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `infotrunk-export-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = `infotrunk-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click(); URL.revokeObjectURL(url);
   };
 
   const subfolders = useMemo(() => {
@@ -109,16 +122,13 @@ const Dashboard = () => {
     return items.filter(item => {
       const q = filters.query.toLowerCase();
       const matchesSearch = q
-        ? item.title.toLowerCase().includes(q) ||
-          item.description?.toLowerCase().includes(q) ||
-          item.content.toLowerCase().includes(q) ||
-          (item.tags || []).some(t => t.includes(q))
+        ? item.title.toLowerCase().includes(q) || item.description?.toLowerCase().includes(q) ||
+          item.content.toLowerCase().includes(q) || (item.tags || []).some(t => t.includes(q))
         : true;
       const matchesFolder = selectedFolder ? item.folder_id === selectedFolder.id : true;
       const matchesType = filters.types.length > 0 ? filters.types.includes(item.type) : true;
       const matchesFavorite = filters.favoritesOnly ? item.is_favorite : true;
       const matchesTags = filters.tags.length > 0 ? filters.tags.every(t => (item.tags || []).includes(t)) : true;
-
       let matchesDate = true;
       if (filters.dateRange !== "all" && item.created_at) {
         const created = new Date(item.created_at);
@@ -127,7 +137,6 @@ const Dashboard = () => {
         else if (filters.dateRange === "week") matchesDate = now.getTime() - created.getTime() < 7 * 86400000;
         else if (filters.dateRange === "month") matchesDate = now.getTime() - created.getTime() < 30 * 86400000;
       }
-
       return matchesSearch && matchesFolder && matchesType && matchesFavorite && matchesTags && matchesDate;
     });
   }, [items, filters, selectedFolder]);
@@ -145,10 +154,7 @@ const Dashboard = () => {
     if (!selectedFolder) return [];
     const path: Folder[] = [];
     let current: Folder | undefined = selectedFolder;
-    while (current) {
-      path.unshift(current);
-      current = folders.find(f => f.id === current?.parent_id);
-    }
+    while (current) { path.unshift(current); current = folders.find(f => f.id === current?.parent_id); }
     return path;
   }, [selectedFolder, folders]);
 
@@ -161,18 +167,16 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">
             {selectedFolder && (
-              <Button
-                variant="ghost" size="icon"
+              <Button variant="ghost" size="icon" className="rounded-xl"
                 onClick={() => {
                   const parent = folders.find(f => f.id === selectedFolder.parent_id);
                   setSelectedFolder(parent || null);
-                }}
-              >
+                }}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             )}
@@ -186,10 +190,8 @@ const Dashboard = () => {
                   {breadcrumb.map((folder, i) => (
                     <span key={folder.id} className="flex items-center gap-1">
                       <ChevronRight className="w-3 h-3" />
-                      <button
-                        onClick={() => setSelectedFolder(folder)}
-                        className={`hover:text-foreground transition-colors ${i === breadcrumb.length - 1 ? "text-foreground font-medium" : ""}`}
-                      >
+                      <button onClick={() => setSelectedFolder(folder)}
+                        className={`hover:text-foreground transition-colors ${i === breadcrumb.length - 1 ? "text-foreground font-medium" : ""}`}>
                         {folder.name}
                       </button>
                     </span>
@@ -211,11 +213,11 @@ const Dashboard = () => {
               <SearchFilters filters={filters} onChange={setFilters} availableTags={availableTags} />
             </div>
             <div className="flex items-start gap-2">
-              <div className="flex items-center border border-border/50 rounded-lg p-1 bg-card">
-                <Button variant={viewMode === "grid" ? "secondary" : "ghost"} size="icon" onClick={() => setViewMode("grid")} className="h-8 w-8">
+              <div className="flex items-center border border-border/40 rounded-xl p-1 bg-card/60 backdrop-blur-sm">
+                <Button variant={viewMode === "grid" ? "secondary" : "ghost"} size="icon" onClick={() => setViewMode("grid")} className="h-8 w-8 rounded-lg">
                   <LayoutGrid className="w-4 h-4" />
                 </Button>
-                <Button variant={viewMode === "list" ? "secondary" : "ghost"} size="icon" onClick={() => setViewMode("list")} className="h-8 w-8">
+                <Button variant={viewMode === "list" ? "secondary" : "ghost"} size="icon" onClick={() => setViewMode("list")} className="h-8 w-8 rounded-lg">
                   <List className="w-4 h-4" />
                 </Button>
               </div>
@@ -223,9 +225,9 @@ const Dashboard = () => {
               <AddItemDialog folders={folders} defaultFolderId={selectedFolder?.id} />
               <CreateShareDialog />
               {items.length > 0 && (
-                <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2 rounded-xl">
                   <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">Export CSV</span>
+                  <span className="hidden sm:inline">Export</span>
                 </Button>
               )}
             </div>
@@ -240,11 +242,10 @@ const Dashboard = () => {
           <AnimatePresence mode="wait">
             {!selectedFolder ? (
               <motion.div key="root" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                {/* Folders */}
                 {!showFilteredResults && rootFolders.length > 0 && (
                   <section className="mb-10">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                         <FolderOpen className="w-4 h-4 text-primary" />
                       </div>
                       <div>
@@ -260,17 +261,17 @@ const Dashboard = () => {
                           onRename={() => { setRenameName(folder.name); setRenameDialog(folder); }}
                           onDelete={() => setDeleteDialog({ type: "folder", id: folder.id })}
                           onMove={handleMoveFolder}
+                          onShare={handleShareFolder}
                         />
                       ))}
                     </div>
                   </section>
                 )}
 
-                {/* Items */}
                 {(showFilteredResults ? filteredItems : unfolderedItems).length > 0 && (
                   <section>
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
                         <Database className="w-4 h-4 text-accent" />
                       </div>
                       <div>
@@ -299,15 +300,14 @@ const Dashboard = () => {
                   </section>
                 )}
 
-                {/* Empty */}
                 {rootFolders.length === 0 && unfolderedItems.length === 0 && !showFilteredResults && (
                   <div className="text-center py-24">
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-primary/10 flex items-center justify-center">
                       <Database className="w-10 h-10 text-primary/60" />
                     </div>
-                     <h2 className="text-2xl font-bold mb-2">🎉 Welcome to Info Trunk!</h2>
+                    <h2 className="text-2xl font-bold mb-2">🎉 Welcome to Info Trunk!</h2>
                     <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                      You have no saved links yet. Start by creating your first folder, then add links, images, videos, or notes.
+                      Start by creating your first folder, then add links, images, videos, or notes.
                     </p>
                     <div className="flex items-center justify-center gap-3">
                       <CreateFolderDialog folders={folders} />
@@ -329,6 +329,7 @@ const Dashboard = () => {
                           onRename={() => { setRenameName(folder.name); setRenameDialog(folder); }}
                           onDelete={() => setDeleteDialog({ type: "folder", id: folder.id })}
                           onMove={handleMoveFolder}
+                          onShare={handleShareFolder}
                         />
                       ))}
                     </div>
