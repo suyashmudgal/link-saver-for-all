@@ -17,7 +17,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Loader2 className="w-6 h-6 text-primary animate-spin" />
           </div>
           <p className="text-sm text-muted-foreground">Loading your vault...</p>
@@ -32,7 +32,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="min-h-screen flex w-full">
         <AppSidebar userId={user?.id} />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between px-4 border-b border-border/30 bg-background/50 backdrop-blur-2xl sticky top-0 z-40">
+          <header className="h-14 flex items-center justify-between px-4 border-b border-border/30 bg-background/60 backdrop-blur-2xl sticky top-0 z-40">
             <SidebarTrigger />
             <div className="flex items-center gap-2">
               <NotificationBell />

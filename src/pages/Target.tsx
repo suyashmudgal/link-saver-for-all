@@ -1,6 +1,6 @@
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Target, Flame, Trophy, Zap, AlertTriangle, RotateCcw } from "lucide-react";
+import { Target, Flame, Trophy, Zap, AlertTriangle, RotateCcw, Clock, Calendar } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import TargetSection from "@/components/target/TargetSection";
 import AddCustomTargetDialog from "@/components/target/AddCustomTargetDialog";
+import TargetCompletionDialog from "@/components/target/TargetCompletionDialog";
 import { toast } from "sonner";
 
 const TargetScene = lazy(() => import("@/components/target/TargetScene"));
@@ -19,6 +20,7 @@ interface Section { title: string; emoji: string; color: string; tasks: TaskItem
 
 const STORAGE_KEY = "infotrunk-target-challenge";
 const CUSTOM_SECTIONS_KEY = "infotrunk-target-custom-sections";
+const START_DATE_KEY = "infotrunk-target-start-date";
 
 const defaultSections: Section[] = [
   {
@@ -125,6 +127,19 @@ const TargetPage = () => {
     } catch { return []; }
   });
 
+  const [startDate] = useState<Date>(() => {
+    try {
+      const saved = localStorage.getItem(START_DATE_KEY);
+      if (saved) return new Date(saved);
+      const now = new Date();
+      localStorage.setItem(START_DATE_KEY, now.toISOString());
+      return now;
+    } catch { return new Date(); }
+  });
+
+  const [showCompletion, setShowCompletion] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 7, hours: 0, minutes: 0, seconds: 0 });
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
   }, [completed]);
@@ -133,21 +148,49 @@ const TargetPage = () => {
     localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(customSections));
   }, [customSections]);
 
+  // Countdown timer
+  useEffect(() => {
+    const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const tick = () => {
+      const now = new Date();
+      const diff = endDate.getTime() - now.getTime();
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [startDate]);
+
   const allSections = [...defaultSections, ...customSections];
   const totalTasks = allSections.flatMap((s) => s.tasks).length;
   const completedCount = allSections.flatMap((s) => s.tasks).filter((t) => completed.has(t.id)).length;
   const progress = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
 
-  const toggle = (id: string) => {
+  const toggle = useCallback((id: string) => {
     setCompleted((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
+      // Check if all done after toggle
+      const newCount = allSections.flatMap((s) => s.tasks).filter((t) => next.has(t.id)).length;
+      if (newCount === totalTasks && totalTasks > 0) {
+        setTimeout(() => setShowCompletion(true), 300);
+      }
       return next;
     });
-  };
+  }, [allSections, totalTasks]);
 
   const resetProgress = () => {
     setCompleted(new Set());
+    localStorage.setItem(START_DATE_KEY, new Date().toISOString());
     toast.success("Progress reset! Fresh start 💪");
   };
 
@@ -166,9 +209,14 @@ const TargetPage = () => {
     toast.success("Section removed");
   };
 
+  const timerExpired = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {/* Completion Dialog */}
+        <TargetCompletionDialog open={showCompletion} onClose={() => setShowCompletion(false)} />
+
         {/* 3D Scene */}
         <Suspense fallback={<div className="w-full h-32 md:h-40 rounded-2xl bg-muted/30 animate-pulse" />}>
           <TargetScene />
@@ -178,18 +226,18 @@ const TargetPage = () => {
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'var(--gradient-primary)' }}>
                 <Target className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold">7 Days Challenge</h1>
+                <h1 className="text-2xl md:text-3xl font-extrabold">7 Days Challenge</h1>
                 <p className="text-sm text-muted-foreground">No excuses. Just execution.</p>
               </div>
             </div>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
+                <Button variant="outline" size="sm" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 rounded-xl">
                   <RotateCcw className="w-3.5 h-3.5" /> Reset
                 </Button>
               </AlertDialogTrigger>
@@ -197,7 +245,7 @@ const TargetPage = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Reset all progress?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will uncheck every task across all sections. Your custom target sections will remain, only progress is cleared. This cannot be undone.
+                    This will uncheck every task and restart the 7-day timer. Your custom target sections will remain. This cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -210,10 +258,39 @@ const TargetPage = () => {
             </AlertDialog>
           </div>
 
+          {/* Countdown Timer */}
+          <div className="rounded-2xl border border-border/40 bg-card/70 backdrop-blur-lg p-5 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-sm">Time Remaining</span>
+              {timerExpired && <span className="text-xs text-destructive font-bold ml-auto">⏰ Time's Up!</span>}
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: "Days", value: timeLeft.days },
+                { label: "Hours", value: timeLeft.hours },
+                { label: "Minutes", value: timeLeft.minutes },
+                { label: "Seconds", value: timeLeft.seconds },
+              ].map(({ label, value }) => (
+                <div key={label} className="text-center p-3 rounded-xl bg-muted/50">
+                  <div className="text-2xl md:text-3xl font-extrabold tabular-nums text-foreground">{String(value).padStart(2, "0")}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
+              <Calendar className="w-3.5 h-3.5" />
+              Started: {startDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+              <span className="ml-auto">
+                Deadline: {new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+              </span>
+            </div>
+          </div>
+
           {/* Warning Message */}
-          <div className="rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/5 p-5 md:p-6">
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 md:p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-6 h-6 text-yellow-500 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
               <div className="space-y-2 text-sm md:text-base leading-relaxed">
                 <p className="font-bold text-foreground">Bhai sun dhyaan se ⚠️</p>
                 <p className="text-muted-foreground">Tu already kaafi time waste kar chuka hai. Aise hi chalta raha na toh life mein kuch achieve karna mushkil ho jayega.</p>
@@ -226,7 +303,7 @@ const TargetPage = () => {
         </motion.div>
 
         {/* Progress Bar */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8 rounded-2xl border border-border bg-card p-5">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8 rounded-2xl border border-border/40 bg-card/70 backdrop-blur-lg p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-500" />
@@ -238,7 +315,7 @@ const TargetPage = () => {
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-muted-foreground">{progress}% done</span>
             {progress === 100 && (
-              <span className="text-xs font-bold text-accent flex items-center gap-1">
+              <span className="text-xs font-bold text-primary flex items-center gap-1">
                 <Trophy className="w-3.5 h-3.5" /> Challenge Complete! 🎉
               </span>
             )}
@@ -272,7 +349,7 @@ const TargetPage = () => {
         {/* Bottom Motivation */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          className="mt-10 mb-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5 p-6 text-center"
+          className="mt-10 mb-4 rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center"
         >
           <Zap className="w-8 h-8 text-primary mx-auto mb-3" />
           <p className="text-base md:text-lg font-bold text-foreground mb-2">
@@ -280,7 +357,7 @@ const TargetPage = () => {
           </p>
           <p className="text-sm text-muted-foreground font-medium">
             Now decide — <span className="text-destructive">distraction</span> or{" "}
-            <span className="text-accent font-bold">success</span>.
+            <span className="text-primary font-bold">success</span>.
           </p>
         </motion.div>
       </div>

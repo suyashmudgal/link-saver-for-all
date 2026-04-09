@@ -45,13 +45,13 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     <Sidebar collapsible="icon" className="border-r border-border/30 bg-sidebar/80 backdrop-blur-2xl">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-foreground/20 flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
             <img src="/logo.png" alt="Info Trunk" width={28} height={28} className="rounded-lg" />
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-base font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Info Trunk</h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Link Vault</p>
+              <h1 className="text-base font-bold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>Info Trunk</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Knowledge Vault</p>
             </div>
           )}
         </div>
@@ -87,7 +87,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground rounded-xl">
+        <Button variant="ghost" onClick={handleLogout} className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive rounded-xl">
           <LogOut className="w-4 h-4" />
           {!collapsed && <span>Sign Out</span>}
         </Button>
