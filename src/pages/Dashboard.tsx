@@ -202,39 +202,33 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-1">
-            {selectedFolder && (
-              <Button variant="ghost" size="icon" className="rounded-xl"
-                onClick={() => {
-                  const parent = folders.find(f => f.id === selectedFolder.parent_id);
-                  setSelectedFolder(parent || null);
-                }}>
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            )}
+        {/* Folder header (only inside a folder) */}
+        {selectedFolder && (
+          <div className="mb-8 flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="rounded-xl"
+              onClick={() => {
+                const parent = folders.find(f => f.id === selectedFolder.parent_id);
+                setSelectedFolder(parent || null);
+              }}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div>
-              {selectedFolder && (
-                <h1 className="text-2xl font-bold">{selectedFolder.name}</h1>
-              )}
-              {selectedFolder && (
-                <nav className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                  <button onClick={() => setSelectedFolder(null)} className="hover:text-foreground transition-colors">Home</button>
-                  {breadcrumb.map((folder, i) => (
-                    <span key={folder.id} className="flex items-center gap-1">
-                      <ChevronRight className="w-3 h-3" />
-                      <button onClick={() => setSelectedFolder(folder)}
-                        className={`hover:text-foreground transition-colors ${i === breadcrumb.length - 1 ? "text-foreground font-medium" : ""}`}>
-                        {folder.name}
-                      </button>
-                    </span>
-                  ))}
-                </nav>
-              )}
+              <h1 className="text-2xl font-bold">{selectedFolder.name}</h1>
+              <nav className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                <button onClick={() => setSelectedFolder(null)} className="hover:text-foreground transition-colors">Home</button>
+                {breadcrumb.map((folder, i) => (
+                  <span key={folder.id} className="flex items-center gap-1">
+                    <ChevronRight className="w-3 h-3" />
+                    <button onClick={() => setSelectedFolder(folder)}
+                      className={`hover:text-foreground transition-colors ${i === breadcrumb.length - 1 ? "text-foreground font-medium" : ""}`}>
+                      {folder.name}
+                    </button>
+                  </span>
+                ))}
+              </nav>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Search, Filters & Actions */}
         <div className="flex flex-col gap-4 mb-8">
