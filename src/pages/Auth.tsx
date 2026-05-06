@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Mail, Lock, User, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Loader2, Sparkles, Mail, Lock, User, ArrowLeft, Eye, EyeOff, Zap, Layers, Lock as LockIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { motion } from "framer-motion";
@@ -185,7 +185,7 @@ const Auth = () => {
 
   if (forgotPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden mesh-gradient">
         <Suspense fallback={null}><BackgroundScene /></Suspense>
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
@@ -202,7 +202,7 @@ const Auth = () => {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md relative"
         >
-          <Card className="p-8 shadow-2xl border-border/50 backdrop-blur-sm bg-card/95">
+          <Card className="p-8 shadow-2xl border-border/40 backdrop-blur-2xl bg-card/80 rounded-3xl">
             <button
               onClick={() => setForgotPassword(false)}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
@@ -212,7 +212,7 @@ const Auth = () => {
             </button>
 
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary mb-4 shadow-lg shadow-primary/25">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg shadow-primary/30" style={{ background: 'var(--gradient-aurora)' }}>
                 <Mail className="w-8 h-8 text-primary-foreground" />
               </div>
               <h1 className="text-2xl font-bold mb-2">Reset Password</h1>
@@ -234,14 +234,15 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 h-12 rounded-xl"
                   />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary to-primary hover:opacity-90"
+                className="w-full h-12 rounded-xl text-white hover:opacity-90"
+                style={{ background: 'var(--gradient-aurora)' }}
                 disabled={loading}
               >
                 {loading ? (
@@ -261,44 +262,115 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-background">
       <Suspense fallback={null}><BackgroundScene /></Suspense>
-      {/* Background Effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-      </div>
 
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-4 left-4 z-30">
         <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to home
         </Link>
       </div>
-
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-30">
         <ThemeToggle />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md relative"
-      >
-        <Card className="p-8 shadow-2xl border-border/50 backdrop-blur-sm bg-card/95">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary mb-4 shadow-lg shadow-primary/25">
-              <Sparkles className="w-8 h-8 text-primary-foreground" />
+      <div className="min-h-screen grid lg:grid-cols-[1.1fr_1fr] relative">
+        {/* LEFT — visual story panel */}
+        <motion.aside
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="hidden lg:flex relative overflow-hidden flex-col justify-between p-12 text-white"
+          style={{ background: 'var(--gradient-aurora)' }}
+        >
+          <div className="absolute inset-0 grain opacity-20 mix-blend-overlay" />
+          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-white/20 blur-3xl animate-float" />
+          <div className="absolute -bottom-40 -right-20 w-[28rem] h-[28rem] rounded-full bg-black/20 blur-3xl" />
+
+          <div className="relative">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold tracking-wide">
+              <Sparkles className="w-3.5 h-3.5" /> Your second brain
             </div>
-            <h1 className="text-2xl font-bold mb-2">
-              {isLogin ? "Welcome Back" : "Create Account"}
-            </h1>
-            <p className="text-muted-foreground">
-              {isLogin ? "Access your personal data vault" : "Start organizing your digital life"}
-            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="relative space-y-8">
+            <h2 className="text-5xl xl:text-6xl font-extrabold leading-[1.05] tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              Capture<br/>everything.<br/>
+              <span className="italic font-light opacity-90">Forget nothing.</span>
+            </h2>
+            <p className="text-lg text-white/85 max-w-md leading-relaxed">
+              Info Trunk is the calm, beautiful place for every link, note and idea — searchable forever.
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 max-w-md">
+              {[
+                { icon: Layers, label: "Smart folders" },
+                { icon: Zap, label: "AI recall" },
+                { icon: LockIcon, label: "Private vault" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="rounded-2xl p-4 bg-white/10 backdrop-blur-md border border-white/15">
+                  <Icon className="w-5 h-5 mb-2" />
+                  <div className="text-xs font-semibold">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative text-xs text-white/70 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+            Encrypted · End-to-end private
+          </div>
+        </motion.aside>
+
+        {/* RIGHT — form */}
+        <main className="flex items-center justify-center p-6 sm:p-10 mesh-gradient">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md relative"
+          >
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                {isLogin ? "Sign in" : "Create your account"}
+              </div>
+              <h1 className="text-4xl font-extrabold tracking-tight mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                {isLogin ? <>Welcome <span className="aurora-text">back</span>.</> : <>Let's get <span className="aurora-text">started</span>.</>}
+              </h1>
+              <p className="text-muted-foreground">
+                {isLogin ? "Sign in to access your knowledge vault." : "It only takes a minute. No credit card."}
+              </p>
+            </div>
+
+            {/* Tab switcher */}
+            <div className="grid grid-cols-2 p-1 mb-6 rounded-2xl bg-muted/60 backdrop-blur-md border border-border/40">
+              {[
+                { label: "Sign In", value: true },
+                { label: "Sign Up", value: false },
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => setIsLogin(opt.value)}
+                  className={`relative h-10 rounded-xl text-sm font-semibold transition-colors ${
+                    isLogin === opt.value ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {isLogin === opt.value && (
+                    <motion.span
+                      layoutId="auth-tab"
+                      className="absolute inset-0 rounded-xl shadow-lg"
+                      style={{ background: 'var(--gradient-aurora)' }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
@@ -311,7 +383,7 @@ const Auth = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     disabled={loading}
-                    className="pl-10"
+                    className="pl-10 h-12 rounded-xl bg-background/60"
                   />
                 </div>
               </div>
@@ -329,7 +401,7 @@ const Auth = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="pl-10"
+                  className="pl-10 h-12 rounded-xl bg-background/60"
                 />
               </div>
             </div>
@@ -346,7 +418,7 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 h-12 rounded-xl bg-background/60"
                 />
                 <button
                   type="button"
@@ -372,7 +444,7 @@ const Auth = () => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 h-12 rounded-xl bg-background/60"
                   />
                   <button
                     type="button"
@@ -412,7 +484,8 @@ const Auth = () => {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-primary to-primary hover:opacity-90 shadow-lg shadow-primary/25"
+              className="w-full h-12 rounded-xl text-white hover:opacity-90 shadow-lg shadow-primary/30"
+              style={{ background: 'var(--gradient-aurora)' }}
               disabled={loading}
             >
               {loading ? (
@@ -421,28 +494,19 @@ const Auth = () => {
                   Processing...
                 </>
               ) : isLogin ? (
-                "Sign In"
+                "Sign in to vault →"
               ) : (
-                "Create Account"
+                "Create my vault →"
               )}
             </Button>
-          </form>
+            </form>
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              disabled={loading}
-            >
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <span className="font-semibold text-primary">
-                {isLogin ? "Sign Up" : "Sign In"}
-              </span>
-            </button>
-          </div>
-        </Card>
-      </motion.div>
+            <p className="mt-6 text-xs text-center text-muted-foreground">
+              By continuing you agree to our terms & privacy.
+            </p>
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 };
