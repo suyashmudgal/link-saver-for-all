@@ -22,7 +22,7 @@ function Particles() {
   return (
     <points ref={ref}>
       <bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry>
-      <pointsMaterial size={0.04} color="#10b981" transparent opacity={0.4} sizeAttenuation />
+      <pointsMaterial size={0.04} color="#ec4899" transparent opacity={0.45} sizeAttenuation />
     </points>
   );
 }
@@ -46,9 +46,9 @@ const BackgroundScene = () => (
   <div className="fixed inset-0 -z-10 pointer-events-none">
     <Canvas camera={{ position: [0, 0, 8], fov: 50 }} gl={{ alpha: true, antialias: false, powerPreference: "low-power" }} dpr={[1, 1.5]}>
       <Particles />
-      <FloatingOrb position={[-3, 2, -2]} color="#10b981" speed={0.5} />
-      <FloatingOrb position={[4, -1, -3]} color="#14b8a6" speed={0.7} />
-      <FloatingOrb position={[0, 3, -4]} color="#f59e0b" speed={0.4} />
+      <FloatingOrb position={[-3, 2, -2]} color="#ec4899" speed={0.5} />
+      <FloatingOrb position={[4, -1, -3]} color="#a855f7" speed={0.7} />
+      <FloatingOrb position={[0, 3, -4]} color="#fb923c" speed={0.4} />
     </Canvas>
   </div>
 );
