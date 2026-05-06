@@ -168,6 +168,40 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero greeting (root only) */}
+        {!selectedFolder && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-3xl p-6 md:p-8 mb-8 border border-border/40"
+            style={{ background: 'var(--gradient-hero)' }}
+          >
+            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl opacity-40" style={{ background: 'var(--gradient-aurora)' }} />
+            <div className="relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div>
+                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-muted-foreground mb-2">Your knowledge vault</p>
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                  Hello, <span className="aurora-text">{user?.user_metadata?.full_name?.split(' ')[0] || 'friend'}</span>.
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">Here's everything you've collected, organised beautifully.</p>
+              </div>
+              <div className="grid grid-cols-4 gap-2 md:gap-3">
+                {[
+                  { label: "Items", value: stats.totalItems },
+                  { label: "Folders", value: stats.totalFolders },
+                  { label: "Links", value: stats.links },
+                  { label: "Favs", value: stats.favorites },
+                ].map((s) => (
+                  <div key={s.label} className="min-w-[64px] rounded-2xl px-3 py-2.5 bg-card/70 backdrop-blur-xl border border-border/40 text-center">
+                    <div className="text-xl md:text-2xl font-extrabold tabular-nums">{s.value}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">
@@ -181,10 +215,10 @@ const Dashboard = () => {
               </Button>
             )}
             <div>
-              <h1 className="text-2xl font-bold">
-                {selectedFolder ? selectedFolder.name : "Dashboard"}
-              </h1>
-              {selectedFolder ? (
+              {selectedFolder && (
+                <h1 className="text-2xl font-bold">{selectedFolder.name}</h1>
+              )}
+              {selectedFolder && (
                 <nav className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                   <button onClick={() => setSelectedFolder(null)} className="hover:text-foreground transition-colors">Home</button>
                   {breadcrumb.map((folder, i) => (
@@ -197,10 +231,6 @@ const Dashboard = () => {
                     </span>
                   ))}
                 </nav>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {stats.totalItems} items · {stats.totalFolders} folders · {stats.favorites} favorites
-                </p>
               )}
             </div>
           </div>
