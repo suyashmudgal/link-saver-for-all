@@ -11,9 +11,10 @@ interface Props {
   onToggle: (id: string) => void;
   isCustom?: boolean;
   onDeleteSection?: () => void;
+  onDeleteTask?: (taskId: string) => void;
 }
 
-const TargetSection = ({ section, index, completed, onToggle, isCustom, onDeleteSection }: Props) => {
+const TargetSection = ({ section, index, completed, onToggle, isCustom, onDeleteSection, onDeleteTask }: Props) => {
   const sectionDone = section.tasks.filter((t) => completed.has(t.id)).length;
   const sectionTotal = section.tasks.length;
   const sectionComplete = sectionDone === sectionTotal;
@@ -47,22 +48,32 @@ const TargetSection = ({ section, index, completed, onToggle, isCustom, onDelete
         {section.tasks.map((task) => {
           const done = completed.has(task.id);
           return (
-            <button
+            <div
               key={task.id}
-              onClick={() => onToggle(task.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 group ${
+              className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
                 done ? "bg-accent/10 text-muted-foreground" : "hover:bg-background/50"
               }`}
             >
-              {done ? (
-                <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-muted-foreground/40 shrink-0 group-hover:text-primary transition-colors" />
+              <button onClick={() => onToggle(task.id)} className="flex items-center gap-3 flex-1 text-left">
+                {done ? (
+                  <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
+                ) : (
+                  <Circle className="w-5 h-5 text-muted-foreground/40 shrink-0 group-hover:text-primary transition-colors" />
+                )}
+                <span className={`text-sm transition-all ${done ? "line-through opacity-60" : "text-foreground"}`}>
+                  {task.label}
+                </span>
+              </button>
+              {onDeleteTask && (
+                <button
+                  onClick={() => onDeleteTask(task.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-destructive/70 hover:text-destructive hover:bg-destructive/10 transition-all"
+                  aria-label="Delete task"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               )}
-              <span className={`text-sm transition-all ${done ? "line-through opacity-60" : "text-foreground"}`}>
-                {task.label}
-              </span>
-            </button>
+            </div>
           );
         })}
       </div>

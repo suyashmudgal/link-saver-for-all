@@ -209,6 +209,20 @@ const TargetPage = () => {
     toast.success("Section removed");
   };
 
+  const deleteTaskFromSection = (sectionIdx: number, taskId: string) => {
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.delete(taskId);
+      return next;
+    });
+    setCustomSections((prev) =>
+      prev.map((s, i) =>
+        i === sectionIdx ? { ...s, tasks: s.tasks.filter((t) => t.id !== taskId) } : s
+      )
+    );
+    toast.success("Target removed");
+  };
+
   const timerExpired = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
 
   return (
@@ -337,6 +351,7 @@ const TargetPage = () => {
               onToggle={toggle}
               isCustom
               onDeleteSection={() => deleteCustomSection(idx)}
+              onDeleteTask={(taskId) => deleteTaskFromSection(idx, taskId)}
             />
           ))}
         </div>
