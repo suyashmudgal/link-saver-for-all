@@ -59,6 +59,25 @@ function getDomain(url: string): string {
   }
 }
 
+function isPrivateOrReservedHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  const patterns = [
+    /^localhost$/i,
+    /^127\./,
+    /^0\./,
+    /^10\./,
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+    /^192\.168\./,
+    /^169\.254\./,
+    /^::1$/,
+    /^fc00:/i,
+    /^fe80:/i,
+    /\.local$/i,
+    /\.internal$/i,
+  ];
+  return patterns.some((p) => p.test(h));
+}
+
 function resolveUrl(base: string, relative: string): string {
   if (!relative) return '';
   if (relative.startsWith('http://') || relative.startsWith('https://')) {
@@ -107,6 +126,29 @@ Deno.serve(async (req) => {
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
       formattedUrl = `https://${formattedUrl}`;
+    }
+
+    // SSRF guard: enforce https + block private/reserved hosts
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(formattedUrl);
+    } catch {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid URL' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (parsedUrl.protocol !== 'https:') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Only https URLs are allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (isPrivateOrReservedHost(parsedUrl.hostname)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'URL host is not allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log('Fetching preview for:', formattedUrl);

@@ -121,13 +121,11 @@ export const usePublicCollection = (token: string) => {
     queryKey: ["public_collection", token],
     enabled: !!token,
     queryFn: async () => {
-      const { data: collection, error } = await supabase
-        .from("shared_collections")
-        .select("*")
-        .eq("share_token", token)
-        .eq("is_active", true)
-        .single();
+      const { data: collections, error } = await supabase
+        .rpc("get_shared_collection_by_token", { _token: token });
       if (error) throw error;
+      const collection = Array.isArray(collections) ? collections[0] : collections;
+      if (!collection) throw new Error("Collection not found");
 
       const { data: collectionItems, error: itemsError } = await supabase
         .from("shared_collection_items")
