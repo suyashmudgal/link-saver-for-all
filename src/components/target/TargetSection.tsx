@@ -67,10 +67,10 @@ const TargetSection = ({ section, index, completed, onToggle, isCustom, onDelete
               {onDeleteTask && (
                 <button
                   onClick={() => onDeleteTask(task.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-destructive/70 hover:text-destructive hover:bg-destructive/10 transition-all"
+                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1.5 rounded-md text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
                   aria-label="Delete task"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               )}
             </div>
