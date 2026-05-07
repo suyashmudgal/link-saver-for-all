@@ -18,13 +18,26 @@ export const useNotifications = () => {
 
   // Subscribe to realtime notifications
   useEffect(() => {
-    const channel = supabase
-      .channel("notifications-realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, () => {
-        queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      channel = supabase
+        .channel(`notifications:${user.id}`, { config: { private: true } })
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+          () => {
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+          }
+        )
+        .subscribe();
+    })();
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [queryClient]);
 
   return useQuery({
