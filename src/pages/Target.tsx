@@ -21,69 +21,83 @@ interface Section { title: string; emoji: string; color: string; tasks: TaskItem
 const STORAGE_KEY = "infotrunk-target-challenge";
 const CUSTOM_SECTIONS_KEY = "infotrunk-target-custom-sections";
 const START_DATE_KEY = "infotrunk-target-start-date";
+const DELETED_TASKS_KEY = "infotrunk-target-deleted-tasks";
 
 const defaultSections: Section[] = [
   {
     title: "DSA (Mandatory)", emoji: "🧠",
     color: "from-red-500/20 to-orange-500/20 border-red-500/30",
     tasks: [
-      { id: "dsa-1", label: "Last Occurrence Of A Char" },
-      { id: "dsa-2", label: "Reverse A String (RE)" },
-      { id: "dsa-3", label: "Add Strings (RE)" },
-      { id: "dsa-4", label: "Palindrome Check (RE)" },
-      { id: "dsa-5", label: "Remove All Occurrences of a Substring" },
-      { id: "dsa-6", label: "Print All Subarrays Using RE" },
-      { id: "dsa-7", label: "Buy & Sell Stocks" },
-      { id: "dsa-8", label: "House Robber Problem" },
-      { id: "dsa-9", label: "Integer to English Words" },
-      { id: "dsa-10", label: "Wild Card Matching" },
-      { id: "dsa-11", label: "Perfect Squares" },
-      { id: "dsa-12", label: "Minimum Cost For Tickets" },
-      { id: "dsa-13", label: "Number Of Dice Roll With Target Sum" },
-      { id: "dsa-14", label: "DnC Level 1, 2, 3, 4" },
+      { id: "dsa-oops-1", label: "OOPs Class - 1" },
+      { id: "dsa-oops-2", label: "OOPs Class - 2" },
+      { id: "dsa-oops-3", label: "OOPs Class - 3" },
+      { id: "dsa-const", label: "const Keyword" },
+      { id: "dsa-init-list", label: "Initialization List" },
+      { id: "dsa-macros", label: "MACROS" },
+      { id: "dsa-shallow-deep", label: "Shallow Copy vs Deep Copy" },
+      { id: "dsa-local-global", label: "Local vs Global Variables" },
+      { id: "dsa-static", label: "Static Keyword In Class" },
+      { id: "dsa-abstract", label: "Abstraction In C++" },
+      { id: "dsa-inline", label: "Inline Functions" },
+      { id: "dsa-friend", label: "Friend Keyword In C++" },
+      { id: "dsa-private-ctor", label: "Can Constructor Be Made Private" },
+      { id: "dsa-virtual", label: "Virtual Constructor vs Virtual Destructor" },
+      { id: "dsa-practice-q", label: "🎯 Practice Day: DSA Questions" },
+      { id: "dsa-practice-rev", label: "🎯 Practice Day: Previous Questions Revision" },
+      { id: "dsa-practice-logic", label: "🎯 Practice Day: Logic Building" },
     ],
   },
   {
     title: "Aptitude", emoji: "📐",
     color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30",
     tasks: [
-      { id: "apt-1", label: "Mensuration" },
-      { id: "apt-2", label: "Mensuration 2D" },
-      { id: "apt-3", label: "Mensuration 3D" },
-      { id: "apt-4", label: "Ages" },
-      { id: "apt-5", label: "Averages" },
-      { id: "apt-6", label: "Basic Calculation Tricks" },
-      { id: "apt-7", label: "Boat & Stream" },
+      { id: "apt-mixture", label: "Mixture and Alligation" },
+      { id: "apt-numbers", label: "Numbers" },
+      { id: "apt-partnership", label: "Partnership" },
+      { id: "apt-percentages", label: "Percentages" },
+      { id: "apt-permutation", label: "Permutation" },
+      { id: "apt-pipes", label: "Pipes and Cistern" },
+      { id: "apt-practice-q", label: "🎯 Practice Day: Aptitude Questions" },
+      { id: "apt-practice-speed", label: "🎯 Practice Day: Speed Improvement" },
+      { id: "apt-practice-formula", label: "🎯 Practice Day: Formula Revision" },
     ],
   },
   {
     title: "English", emoji: "📖",
     color: "from-emerald-500/20 to-green-500/20 border-emerald-500/30",
-    tasks: [{ id: "eng-1", label: "Watch 1 English video daily (Total 7 days)" }],
+    tasks: [
+      { id: "eng-d1", label: "Day 1 — Create 1 English Video" },
+      { id: "eng-d2", label: "Day 2 — Create 1 English Video" },
+      { id: "eng-d3", label: "Day 3 — Create 1 English Video" },
+      { id: "eng-d4", label: "Day 4 — Create 1 English Video" },
+      { id: "eng-d5", label: "Day 5 — Create 1 English Video" },
+      { id: "eng-d6", label: "Day 6 — Create 1 English Video" },
+      { id: "eng-d7", label: "Day 7 — Create 1 English Video" },
+    ],
   },
   {
     title: "Deep Learning", emoji: "🤖",
     color: "from-purple-500/20 to-violet-500/20 border-purple-500/30",
     tasks: [
-      { id: "dl-1", label: "Vanishing Gradient Problem & Sigmoid" },
-      { id: "dl-2", label: "Sigmoid Activation Function (1.0 & 2.0)" },
-      { id: "dl-3", label: "Tanh Activation Function" },
-      { id: "dl-4", label: "ReLU, Leaky ReLU, Parametric ReLU" },
-      { id: "dl-5", label: "ELU Activation Function" },
-      { id: "dl-6", label: "Softmax" },
-      { id: "dl-7", label: "Which Activation Function to Use" },
-      { id: "dl-8", label: "Loss Function vs Cost Function" },
-      { id: "dl-9", label: "Regression Cost Function" },
-      { id: "dl-10", label: "Classification Loss Functions" },
-      { id: "dl-11", label: "Which Loss Function to Use" },
-      { id: "dl-12", label: "Gradient Descent Optimizers" },
+      { id: "dl-keras", label: "Keras Tuning" },
+      { id: "dl-cnn-1", label: "CNN - 1" },
+      { id: "dl-cnn-2", label: "CNN - 2" },
+      { id: "dl-cnn-3", label: "CNN - 3" },
+      { id: "dl-cnn-4", label: "CNN - 4" },
+      { id: "dl-cnn-5", label: "CNN - 5" },
+      { id: "dl-bp-cnn-1", label: "Backpropagation CNN - 1" },
+      { id: "dl-bp-cnn-2", label: "Backpropagation CNN - 2" },
+      { id: "dl-cat-dog", label: "Cat vs Dog Image Classification Project" },
+      { id: "dl-rev-concepts", label: "🎯 Revision Day: DL Concepts" },
+      { id: "dl-rev-cnn", label: "🎯 Revision Day: CNN Flow" },
+      { id: "dl-rev-notes", label: "🎯 Revision Day: Notes + Important Points" },
     ],
   },
   {
     title: "Python Revision", emoji: "🐍",
     color: "from-yellow-500/20 to-amber-500/20 border-yellow-500/30",
     tasks: [
-      { id: "py-1", label: "Variables, Data Types" },
+      { id: "py-1", label: "Variables & Data Types" },
       { id: "py-2", label: "Loops & Conditions" },
       { id: "py-3", label: "Functions" },
       { id: "py-4", label: "List, Tuple, Set, Dictionary" },
@@ -107,7 +121,10 @@ const defaultSections: Section[] = [
       { id: "sql-4", label: "COUNT, SUM, AVG, MIN, MAX" },
       { id: "sql-5", label: "GROUP BY" },
       { id: "sql-6", label: "HAVING" },
-      { id: "sql-7", label: "INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN" },
+      { id: "sql-7", label: "INNER JOIN" },
+      { id: "sql-8", label: "LEFT JOIN" },
+      { id: "sql-9", label: "RIGHT JOIN" },
+      { id: "sql-10", label: "FULL JOIN" },
     ],
   },
 ];
@@ -140,6 +157,17 @@ const TargetPage = () => {
   const [showCompletion, setShowCompletion] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 7, hours: 0, minutes: 0, seconds: 0 });
 
+  const [deletedTaskIds, setDeletedTaskIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(DELETED_TASKS_KEY);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch { return new Set(); }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(DELETED_TASKS_KEY, JSON.stringify([...deletedTaskIds]));
+  }, [deletedTaskIds]);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
   }, [completed]);
@@ -170,7 +198,10 @@ const TargetPage = () => {
     return () => clearInterval(interval);
   }, [startDate]);
 
-  const allSections = [...defaultSections, ...customSections];
+  const visibleDefaultSections = defaultSections
+    .map((s) => ({ ...s, tasks: s.tasks.filter((t) => !deletedTaskIds.has(t.id)) }))
+    .filter((s) => s.tasks.length > 0);
+  const allSections = [...visibleDefaultSections, ...customSections];
   const totalTasks = allSections.flatMap((s) => s.tasks).length;
   const completedCount = allSections.flatMap((s) => s.tasks).filter((t) => completed.has(t.id)).length;
   const progress = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
@@ -190,6 +221,7 @@ const TargetPage = () => {
 
   const resetProgress = () => {
     setCompleted(new Set());
+    setDeletedTaskIds(new Set());
     localStorage.setItem(START_DATE_KEY, new Date().toISOString());
     toast.success("Progress reset! Fresh start 💪");
   };
@@ -220,6 +252,16 @@ const TargetPage = () => {
         i === sectionIdx ? { ...s, tasks: s.tasks.filter((t) => t.id !== taskId) } : s
       )
     );
+    toast.success("Target removed");
+  };
+
+  const deleteDefaultTask = (taskId: string) => {
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.delete(taskId);
+      return next;
+    });
+    setDeletedTaskIds((prev) => new Set(prev).add(taskId));
     toast.success("Target removed");
   };
 
@@ -338,15 +380,22 @@ const TargetPage = () => {
 
         {/* Sections */}
         <div className="space-y-6">
-          {defaultSections.map((section, idx) => (
-            <TargetSection key={section.title} section={section} index={idx} completed={completed} onToggle={toggle} />
+          {visibleDefaultSections.map((section, idx) => (
+            <TargetSection
+              key={section.title}
+              section={section}
+              index={idx}
+              completed={completed}
+              onToggle={toggle}
+              onDeleteTask={deleteDefaultTask}
+            />
           ))}
 
           {customSections.map((section, idx) => (
             <TargetSection
               key={`custom-${idx}`}
               section={section}
-              index={defaultSections.length + idx}
+              index={visibleDefaultSections.length + idx}
               completed={completed}
               onToggle={toggle}
               isCustom
