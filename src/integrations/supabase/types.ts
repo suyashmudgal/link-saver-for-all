@@ -359,6 +359,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_shared_collection_by_token: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
