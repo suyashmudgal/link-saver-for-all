@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Link2, Star, BarChart3, Shield, Target,
-  LogOut, Share2, BookOpen, Settings
+  LogOut, Share2, BookOpen, Settings, History
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
     { title: "Insights", url: "/insights", icon: BarChart3 },
     { title: "Shared", url: "/shared", icon: Share2 },
     { title: "Target", url: "/target", icon: Target },
+    { title: "Target History", url: "/target-history", icon: History },
     { title: "Settings", url: "/settings", icon: Settings },
   ];
   if (isAdmin) navItems.push({ title: "Admin", url: "/admin", icon: Shield });

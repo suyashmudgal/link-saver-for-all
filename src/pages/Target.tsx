@@ -1,7 +1,9 @@
 import { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Target, Flame, Trophy, Zap, AlertTriangle, RotateCcw, Clock, Calendar } from "lucide-react";
+import { Target, Flame, Trophy, Zap, AlertTriangle, RotateCcw, Clock, Calendar, History } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useNavigate } from "react-router-dom";
+import { HISTORY_KEY, type ChallengeRecord } from "@/pages/TargetHistory";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ const STORAGE_KEY = "infotrunk-target-challenge";
 const CUSTOM_SECTIONS_KEY = "infotrunk-target-custom-sections";
 const START_DATE_KEY = "infotrunk-target-start-date";
 const DELETED_TASKS_KEY = "infotrunk-target-deleted-tasks";
+const ARCHIVED_KEY = "infotrunk-target-archived-cycles";
 
 const defaultSections: Section[] = [
   {
@@ -130,6 +133,7 @@ const defaultSections: Section[] = [
 ];
 
 const TargetPage = () => {
+  const navigate = useNavigate();
   const [completed, setCompleted] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -144,7 +148,7 @@ const TargetPage = () => {
     } catch { return []; }
   });
 
-  const [startDate] = useState<Date>(() => {
+  const [startDate, setStartDate] = useState<Date>(() => {
     try {
       const saved = localStorage.getItem(START_DATE_KEY);
       if (saved) return new Date(saved);
@@ -222,7 +226,9 @@ const TargetPage = () => {
   const resetProgress = () => {
     setCompleted(new Set());
     setDeletedTaskIds(new Set());
-    localStorage.setItem(START_DATE_KEY, new Date().toISOString());
+    const now = new Date();
+    localStorage.setItem(START_DATE_KEY, now.toISOString());
+    setStartDate(now);
     toast.success("Progress reset! Fresh start 💪");
   };
 
@@ -266,6 +272,51 @@ const TargetPage = () => {
   };
 
   const timerExpired = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
+
+  // Auto-archive when timer expires: save report, clear tasks, restart cycle
+  useEffect(() => {
+    if (!timerExpired) return;
+    try {
+      const archived: string[] = JSON.parse(localStorage.getItem(ARCHIVED_KEY) || "[]");
+      const cycleId = startDate.toISOString();
+      if (archived.includes(cycleId)) return;
+
+      const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const sections = allSections.map((s) => ({
+        title: s.title,
+        emoji: s.emoji,
+        done: s.tasks.filter((t) => completed.has(t.id)).length,
+        total: s.tasks.length,
+      }));
+      const record: ChallengeRecord = {
+        id: cycleId,
+        startDate: cycleId,
+        endDate: endDate.toISOString(),
+        totalTasks,
+        completedTasks: completedCount,
+        percent: progress,
+        sections,
+      };
+      const history: ChallengeRecord[] = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+      history.unshift(record);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      localStorage.setItem(ARCHIVED_KEY, JSON.stringify([...archived, cycleId]));
+
+      // Clear tasks and start a fresh 7-day cycle
+      setCompleted(new Set());
+      setDeletedTaskIds(new Set());
+      const now = new Date();
+      localStorage.setItem(START_DATE_KEY, now.toISOString());
+      setStartDate(now);
+
+      toast.success("Challenge ended — report saved to Target History 📊", {
+        action: { label: "View", onClick: () => navigate("/target-history") },
+        duration: 8000,
+      });
+    } catch (e) {
+      console.error("Failed to archive challenge:", e);
+    }
+  }, [timerExpired, startDate, allSections, completed, totalTasks, completedCount, progress, navigate]);
 
   return (
     <DashboardLayout>
@@ -312,6 +363,12 @@ const TargetPage = () => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </div>
+
+          <div className="flex justify-end mb-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/target-history")} className="gap-1.5 text-muted-foreground hover:text-foreground rounded-xl">
+              <History className="w-3.5 h-3.5" /> View History
+            </Button>
           </div>
 
           {/* Countdown Timer */}
