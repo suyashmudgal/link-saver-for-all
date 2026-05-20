@@ -6,6 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link2, FileText, Image as ImageIcon, Video, ExternalLink, Share2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const safeHref = (url: string): string =>
+  /^https?:\/\//i.test(url) ? url : "#";
+
 const typeConfig: Record<string, { icon: React.ReactNode; color: string }> = {
   link: { icon: <Link2 className="w-4 h-4" />, color: "bg-blue-500/10 text-blue-500" },
   note: { icon: <FileText className="w-4 h-4" />, color: "bg-amber-500/10 text-amber-500" },
@@ -94,7 +97,7 @@ const SharedView = () => {
                   </div>
                   {item.type === "link" && (
                     <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                      <a href={item.content} target="_blank" rel="noopener noreferrer">
+                      <a href={safeHref(item.content)} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     </Button>
