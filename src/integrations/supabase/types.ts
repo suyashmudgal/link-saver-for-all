@@ -371,6 +371,40 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_shared_collection_items_by_token: {
+        Args: { _token: string }
+        Returns: {
+          archive_url: string | null
+          content: string
+          created_at: string
+          description: string | null
+          folder_id: string | null
+          future_message: string | null
+          id: string
+          is_favorite: boolean | null
+          is_locked: boolean | null
+          is_read: boolean | null
+          last_checked_at: string | null
+          link_status: string | null
+          priority: string | null
+          read_at: string | null
+          save_reason: string | null
+          snoozed_until: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          type: Database["public"]["Enums"]["item_type"]
+          unlock_date: string | null
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "items"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
