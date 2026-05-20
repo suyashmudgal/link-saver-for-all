@@ -6,6 +6,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function isPrivateOrReservedHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  const patterns = [
+    /^localhost$/i, /^127\./, /^0\./, /^10\./,
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./, /^169\.254\./,
+    /^::1$/, /^fc00:/i, /^fe80:/i, /\.local$/i, /\.internal$/i,
+  ];
+  return patterns.some((p) => p.test(h));
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
