@@ -10,6 +10,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Require shared secret to prevent unauthenticated abuse
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    if (!cronSecret || req.headers.get("x-cron-secret") !== cronSecret) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
@@ -36,6 +44,18 @@ serve(async (req) => {
     for (const link of links) {
       let status = "alive";
       let archiveUrl: string | null = null;
+
+      // SSRF guard: only allow https + reject private/reserved hosts
+      let parsed: URL | null = null;
+      try { parsed = new URL(link.content); } catch { parsed = null; }
+      if (!parsed || parsed.protocol !== "https:" || isPrivateOrReservedHost(parsed.hostname)) {
+        await supabase.from("items").update({
+          link_status: "dead",
+          last_checked_at: new Date().toISOString(),
+        }).eq("id", link.id);
+        results.push({ id: link.id, status: "dead" });
+        continue;
+      }
 
       try {
         // Try HEAD request first, fall back to GET
