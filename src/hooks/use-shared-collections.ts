@@ -127,20 +127,9 @@ export const usePublicCollection = (token: string) => {
       const collection = Array.isArray(collections) ? collections[0] : collections;
       if (!collection) throw new Error("Collection not found");
 
-      const { data: collectionItems, error: itemsError } = await supabase
-        .from("shared_collection_items")
-        .select("item_id")
-        .eq("collection_id", collection.id);
+      const { data: items, error: itemsError } = await supabase
+        .rpc("get_shared_collection_items_by_token", { _token: token });
       if (itemsError) throw itemsError;
-
-      const itemIds = (collectionItems || []).map((ci) => ci.item_id);
-      if (itemIds.length === 0) return { collection, items: [] };
-
-      const { data: items, error: fetchError } = await supabase
-        .from("items")
-        .select("*")
-        .in("id", itemIds);
-      if (fetchError) throw fetchError;
 
       return { collection, items: items || [] };
     },
