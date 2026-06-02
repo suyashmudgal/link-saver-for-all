@@ -11,8 +11,8 @@ import logoImg from "/logo.png";
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  viewport: { once: true, margin: "-80px" } as const,
+  transition: { duration: 0.8, ease: "easeOut" as const },
 };
 
 const Landing = () => {
@@ -74,7 +74,7 @@ const Landing = () => {
             <div className="space-y-10">
               <motion.h1
                 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1, ease: "easeOut" }}
                 className="font-serif-display text-[clamp(3.2rem,8vw,7rem)] leading-[0.95] tracking-tight"
               >
                 Save with<br />
