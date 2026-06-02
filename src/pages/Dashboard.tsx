@@ -179,11 +179,15 @@ const Dashboard = () => {
             <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl opacity-40" style={{ background: 'var(--gradient-aurora)' }} />
             <div className="relative flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div>
-                <p className="text-xs font-semibold tracking-[0.25em] uppercase text-muted-foreground mb-2">Your knowledge vault</p>
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                  Hello, <span className="aurora-text">{user?.user_metadata?.full_name?.split(' ')[0] || 'friend'}</span>.
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="w-8 gold-divider" />
+                  <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">The Vault — Interior</p>
+                </div>
+                <h1 className="font-serif-display text-4xl md:text-5xl tracking-tight leading-[1.05]">
+                  Good to see you,<br/>
+                  <em className="text-gradient">{user?.user_metadata?.full_name?.split(' ')[0] || 'friend'}.</em>
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">Here's everything you've collected, organised beautifully.</p>
+                <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed">Your private library, quietly maintained. Curate, recall, and let the analyst do the heavy thinking.</p>
               </div>
               <div className="grid grid-cols-4 gap-2 md:gap-3">
                 {[
@@ -192,9 +196,9 @@ const Dashboard = () => {
                   { label: "Links", value: stats.links },
                   { label: "Favs", value: stats.favorites },
                 ].map((s) => (
-                  <div key={s.label} className="min-w-[64px] rounded-2xl px-3 py-2.5 bg-card/70 backdrop-blur-xl border border-border/40 text-center">
-                    <div className="text-xl md:text-2xl font-extrabold tabular-nums">{s.value}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</div>
+                  <div key={s.label} className="min-w-[68px] rounded-md px-3 py-3 bg-card/80 backdrop-blur-xl border border-border/50 text-center hover:border-primary/40 transition-colors">
+                    <div className="font-serif-display text-2xl md:text-3xl tabular-nums text-gradient leading-none">{s.value}</div>
+                    <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mt-2">{s.label}</div>
                   </div>
                 ))}
               </div>

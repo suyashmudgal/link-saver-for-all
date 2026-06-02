@@ -21,6 +21,7 @@ const ReadQueue = lazy(() => import("./pages/ReadQueue"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Target = lazy(() => import("./pages/Target"));
 const TargetHistory = lazy(() => import("./pages/TargetHistory"));
+const Analyst = lazy(() => import("./pages/Analyst"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/target" element={<Target />} />
               <Route path="/target-history" element={<TargetHistory />} />
+              <Route path="/analyst" element={<Analyst />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
