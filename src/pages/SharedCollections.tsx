@@ -7,15 +7,16 @@ const SharedCollections = () => {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Share2 className="w-5 h-5 text-primary" />
+        <div className="flex items-end justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="w-8 gold-divider" />
+              <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">Published</p>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">Shared Collections</h1>
-              <p className="text-sm text-muted-foreground">Manage your public link collections</p>
-            </div>
+            <h1 className="font-serif-display text-4xl tracking-tight leading-none flex items-center gap-3">
+              <Share2 className="w-6 h-6 text-primary" strokeWidth={1.25} /> Shared Collections
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">Manage your public link collections</p>
           </div>
           <CreateShareDialog />
         </div>

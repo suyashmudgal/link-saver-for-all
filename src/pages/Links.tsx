@@ -63,15 +63,16 @@ const Links = () => {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <Link2 className="w-5 h-5 text-blue-500" />
+        <div className="flex items-end justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="w-8 gold-divider" />
+              <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">The Collection</p>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">All Links</h1>
-              <p className="text-sm text-muted-foreground">{filteredItems.length} of {items.length} items</p>
-            </div>
+            <h1 className="font-serif-display text-4xl tracking-tight leading-none flex items-center gap-3">
+              <Link2 className="w-6 h-6 text-primary" strokeWidth={1.25} /> All Links
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">{filteredItems.length} of {items.length} items</p>
           </div>
           <AddItemDialog folders={folders} />
         </div>

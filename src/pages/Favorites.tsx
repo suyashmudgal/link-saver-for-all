@@ -40,14 +40,15 @@ const Favorites = () => {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-            <Star className="w-5 h-5 text-amber-500" />
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="w-8 gold-divider" />
+            <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">Kept Close</p>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">Favorites</h1>
-            <p className="text-sm text-muted-foreground">{favorites.length} favorite item{favorites.length !== 1 ? "s" : ""}</p>
-          </div>
+          <h1 className="font-serif-display text-4xl tracking-tight leading-none flex items-center gap-3">
+            <Star className="w-6 h-6 text-primary fill-primary/30" strokeWidth={1.25} /> Favorites
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2">{favorites.length} favorite item{favorites.length !== 1 ? "s" : ""}</p>
         </div>
 
         <div className="relative mb-6">
