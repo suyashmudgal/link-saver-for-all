@@ -96,7 +96,11 @@ const Settings = () => {
     <DashboardLayout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl font-bold mb-1">Settings</h1>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="w-8 gold-divider" />
+            <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">House Keeping</p>
+          </div>
+          <h1 className="font-serif-display text-4xl tracking-tight leading-none mb-2">Settings</h1>
           <p className="text-sm text-muted-foreground mb-8">Manage your profile and preferences</p>
 
           {/* Profile Section */}
