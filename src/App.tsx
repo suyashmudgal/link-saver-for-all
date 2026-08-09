@@ -17,11 +17,9 @@ const Insights = lazy(() => import("./pages/Insights"));
 const Admin = lazy(() => import("./pages/Admin"));
 const SharedCollections = lazy(() => import("./pages/SharedCollections"));
 const SharedView = lazy(() => import("./pages/SharedView"));
-const ReadQueue = lazy(() => import("./pages/ReadQueue"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Target = lazy(() => import("./pages/Target"));
 const TargetHistory = lazy(() => import("./pages/TargetHistory"));
-const Analyst = lazy(() => import("./pages/Analyst"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -64,11 +62,9 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/shared" element={<SharedCollections />} />
               <Route path="/shared/:token" element={<SharedView />} />
-              <Route path="/read-queue" element={<ReadQueue />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/target" element={<Target />} />
               <Route path="/target-history" element={<TargetHistory />} />
-              <Route path="/analyst" element={<Analyst />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
