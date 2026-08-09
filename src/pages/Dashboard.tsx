@@ -187,7 +187,7 @@ const Dashboard = () => {
                   Good to see you,<br/>
                   <em className="text-gradient">{user?.user_metadata?.full_name?.split(' ')[0] || 'friend'}.</em>
                 </h1>
-                <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed">Your private library, quietly maintained. Curate, recall, and let the analyst do the heavy thinking.</p>
+                <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed">Your private library, quietly maintained. Curate, search, and recall — whenever you need it.</p>
               </div>
               <div className="grid grid-cols-4 gap-2 md:gap-3">
                 {[

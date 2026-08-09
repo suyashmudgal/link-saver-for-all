@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Link2, Star, BarChart3, Shield, Target,
-  LogOut, Share2, BookOpen, Settings, History, Sparkles
+  LogOut, Share2, Settings, History
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,10 +26,8 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
   const navItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     { title: "All Links", url: "/links", icon: Link2 },
-    { title: "Read Queue", url: "/read-queue", icon: BookOpen },
     { title: "Favorites", url: "/favorites", icon: Star },
     { title: "Insights", url: "/insights", icon: BarChart3 },
-    { title: "Data Analyst", url: "/analyst", icon: Sparkles },
     { title: "Shared", url: "/shared", icon: Share2 },
     { title: "Target", url: "/target", icon: Target },
     { title: "Target History", url: "/target-history", icon: History },
