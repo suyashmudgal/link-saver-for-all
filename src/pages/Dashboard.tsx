@@ -40,6 +40,7 @@ const Dashboard = () => {
   const [renameName, setRenameName] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editItem, setEditItem] = useState<Item | null>(null);
+  const [detailItem, setDetailItem] = useState<Item | null>(null);
   const [filters, setFilters] = useState<SearchFiltersState>({
     query: "", types: [], dateRange: "all", favoritesOnly: false, tags: [],
   });
@@ -325,6 +326,7 @@ const Dashboard = () => {
                           isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                           onDelete={(id) => setDeleteDialog({ type: "item", id })}
                           onMoveToFolder={handleMoveToFolder} onEdit={handleEditItem} folders={folders}
+                          onOpenDetail={(id) => { const found = items.find(i => i.id === id); if (found) setDetailItem(found); }}
                           onToggleFavorite={handleToggleFavorite} onMarkRead={handleMarkRead}
                         />
                       ))}
@@ -383,6 +385,7 @@ const Dashboard = () => {
                         isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                         onDelete={(id) => setDeleteDialog({ type: "item", id })}
                         onMoveToFolder={handleMoveToFolder} onEdit={handleEditItem} folders={folders}
+                          onOpenDetail={(id) => { const found = items.find(i => i.id === id); if (found) setDetailItem(found); }}
                         onToggleFavorite={handleToggleFavorite} onMarkRead={handleMarkRead}
                       />
                     ))}
