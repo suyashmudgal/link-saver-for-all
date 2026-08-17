@@ -43,15 +43,15 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/30 bg-sidebar/80 backdrop-blur-2xl">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 border-b border-border/30">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+          <div className="w-9 h-9 rounded-xl border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0 shadow-lg shadow-primary/10">
             <img src="/logo.png" alt="Info Trunk" width={28} height={28} className="rounded-lg" />
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-base font-bold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>Info Trunk</h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Knowledge Vault</p>
+              <h1 className="font-serif-display text-lg leading-none tracking-tight">Info Trunk</h1>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-[0.3em] mt-1">Knowledge Vault</p>
             </div>
           )}
         </div>
@@ -60,7 +60,7 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {navItems.map(item => {
                 const isActive = location.pathname === item.url;
                 return (
@@ -69,14 +69,17 @@ const AppSidebar = ({ userId }: AppSidebarProps) => {
                       onClick={() => navigate(item.url)}
                       isActive={isActive}
                       tooltip={item.title}
-                      className={`transition-all duration-200 rounded-xl ${
+                      className={`relative transition-all duration-300 rounded-xl ${
                         isActive
-                          ? "bg-primary/10 text-primary font-medium shadow-sm"
-                          : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                          ? "bg-primary/10 text-primary font-medium border border-primary/20 shadow-[0_0_20px_-8px_hsl(var(--primary))]"
+                          : "border border-transparent hover:bg-muted/40 text-muted-foreground hover:text-foreground hover:translate-x-0.5"
                       }`}
                     >
+                      {isActive && !collapsed && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-full bg-primary" />
+                      )}
                       <item.icon className="w-[18px] h-[18px]" />
-                      <span>{item.title}</span>
+                      <span className="tracking-wide">{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

@@ -3,6 +3,9 @@ import { useItems, useFolders, useDeleteItem, useToggleFavorite, useMoveItem, us
 import DashboardLayout from "@/components/DashboardLayout";
 import ItemCard from "@/components/ItemCard";
 import EditItemDialog from "@/components/EditItemDialog";
+import ItemDetailModal from "@/components/ItemDetailModal";
+import EmptyState from "@/components/EmptyState";
+import { CardGridSkeleton } from "@/components/PageSkeletons";
 import SearchFilters, { SearchFiltersState } from "@/components/SearchFilters";
 import AddItemDialog from "@/components/AddItemDialog";
 import { Link2, LayoutGrid, List } from "lucide-react";
@@ -13,13 +16,14 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Links = () => {
-  const { data: items = [] } = useItems();
+  const { data: items = [], isLoading } = useItems();
   const { data: folders = [] } = useFolders();
   const deleteItem = useDeleteItem();
   const toggleFavorite = useToggleFavorite();
   const moveItem = useMoveItem();
   const markRead = useMarkItemRead();
   const [editItem, setEditItem] = useState<Item | null>(null);
+  const [detailItem, setDetailItem] = useState<Item | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filters, setFilters] = useState<SearchFiltersState>({
@@ -91,7 +95,9 @@ const Links = () => {
           </div>
         </div>
 
-        {filteredItems.length > 0 ? (
+        {isLoading ? (
+          <CardGridSkeleton count={8} columns={gridClass} />
+        ) : filteredItems.length > 0 ? (
           <div className={`grid gap-4 ${gridClass}`}>
             {filteredItems.map(item => (
               <ItemCard
@@ -105,21 +111,38 @@ const Links = () => {
                 onDelete={id => setDeleteId(id)}
                 onMoveToFolder={(itemId, folderId) => moveItem.mutate({ itemId, folderId })}
                 onEdit={id => { const item = items.find(i => i.id === id); if (item) setEditItem(item); }}
+                onOpenDetail={id => { const found = items.find(i => i.id === id); if (found) setDetailItem(found); }}
                 folders={folders} onToggleFavorite={handleToggleFavorite}
                 onMarkRead={id => markRead.mutate(id)}
               />
             ))}
           </div>
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={Link2}
+            kicker="The Collection"
+            title="Nothing in the collection yet"
+            description="Save your first link, note, image or video and it will appear here, neatly filed."
+            action={<AddItemDialog folders={folders} />}
+          />
         ) : (
-          <div className="text-center py-24">
-            <Link2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-            <h2 className="text-xl font-semibold text-muted-foreground mb-2">No items found</h2>
-            <p className="text-sm text-muted-foreground">Try adjusting your filters or add new items.</p>
-          </div>
+          <EmptyState
+            icon={Link2}
+            kicker="No matches"
+            title="Nothing matches those filters"
+            description="Try a broader search term, or clear a filter or two to widen the view."
+          />
         )}
       </div>
 
       <EditItemDialog item={editItem} open={!!editItem} onOpenChange={open => !open && setEditItem(null)} folders={folders} />
+      <ItemDetailModal
+        item={detailItem} folders={folders} open={!!detailItem}
+        onOpenChange={open => !open && setDetailItem(null)}
+        onEdit={id => { const found = items.find(i => i.id === id); if (found) setEditItem(found); }}
+        onDelete={id => setDeleteId(id)}
+        onToggleFavorite={handleToggleFavorite}
+      />
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

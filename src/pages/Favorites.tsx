@@ -4,6 +4,9 @@ import { useItems, useFolders, useDeleteItem, useToggleFavorite, useMoveItem, us
 import DashboardLayout from "@/components/DashboardLayout";
 import ItemCard from "@/components/ItemCard";
 import EditItemDialog from "@/components/EditItemDialog";
+import ItemDetailModal from "@/components/ItemDetailModal";
+import EmptyState from "@/components/EmptyState";
+import { CardGridSkeleton } from "@/components/PageSkeletons";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -11,13 +14,14 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Favorites = () => {
-  const { data: items = [] } = useItems();
+  const { data: items = [], isLoading } = useItems();
   const { data: folders = [] } = useFolders();
   const deleteItem = useDeleteItem();
   const toggleFavorite = useToggleFavorite();
   const moveItem = useMoveItem();
   const markRead = useMarkItemRead();
   const [editItem, setEditItem] = useState<Item | null>(null);
+  const [detailItem, setDetailItem] = useState<Item | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
@@ -61,7 +65,9 @@ const Favorites = () => {
           />
         </div>
 
-        {favorites.length > 0 ? (
+        {isLoading ? (
+          <CardGridSkeleton count={8} />
+        ) : favorites.length > 0 ? (
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {favorites.map(item => (
               <ItemCard
@@ -75,21 +81,32 @@ const Favorites = () => {
                 onDelete={id => setDeleteId(id)}
                 onMoveToFolder={(itemId, folderId) => moveItem.mutate({ itemId, folderId })}
                 onEdit={id => { const item = items.find(i => i.id === id); if (item) setEditItem(item); }}
+                onOpenDetail={id => { const found = items.find(i => i.id === id); if (found) setDetailItem(found); }}
                 folders={folders} onToggleFavorite={handleToggleFavorite}
                 onMarkRead={id => markRead.mutate(id)}
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-24">
-            <Star className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-            <h2 className="text-xl font-semibold text-muted-foreground mb-2">No favorites yet</h2>
-            <p className="text-sm text-muted-foreground">Star your important items to find them quickly here.</p>
-          </div>
+          <EmptyState
+            icon={Star}
+            kicker="Kept Close"
+            title={query ? "No favorites match that search" : "Nothing starred yet"}
+            description={query
+              ? "Try a different word — favorites are searched by title and content."
+              : "Star anything worth returning to and it will live here, one click away."}
+          />
         )}
       </div>
 
       <EditItemDialog item={editItem} open={!!editItem} onOpenChange={open => !open && setEditItem(null)} folders={folders} />
+      <ItemDetailModal
+        item={detailItem} folders={folders} open={!!detailItem}
+        onOpenChange={open => !open && setDetailItem(null)}
+        onEdit={id => { const found = items.find(i => i.id === id); if (found) setEditItem(found); }}
+        onDelete={id => setDeleteId(id)}
+        onToggleFavorite={handleToggleFavorite}
+      />
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

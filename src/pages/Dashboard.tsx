@@ -24,6 +24,9 @@ import FolderCard from "@/components/FolderCard";
 import AddItemDialog from "@/components/AddItemDialog";
 import CreateFolderDialog from "@/components/CreateFolderDialog";
 import EditItemDialog from "@/components/EditItemDialog";
+import ItemDetailModal from "@/components/ItemDetailModal";
+import EmptyState from "@/components/EmptyState";
+import { CardGridSkeleton, StatTilesSkeleton } from "@/components/PageSkeletons";
 import CreateShareDialog from "@/components/CreateShareDialog";
 import SearchFilters, { SearchFiltersState } from "@/components/SearchFilters";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +40,7 @@ const Dashboard = () => {
   const [renameName, setRenameName] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editItem, setEditItem] = useState<Item | null>(null);
+  const [detailItem, setDetailItem] = useState<Item | null>(null);
   const [filters, setFilters] = useState<SearchFiltersState>({
     query: "", types: [], dateRange: "all", favoritesOnly: false, tags: [],
   });
@@ -189,14 +193,14 @@ const Dashboard = () => {
                 </h1>
                 <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed">Your private library, quietly maintained. Curate, search, and recall — whenever you need it.</p>
               </div>
-              <div className="grid grid-cols-4 gap-2 md:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 w-full md:w-auto">
                 {[
                   { label: "Items", value: stats.totalItems },
                   { label: "Folders", value: stats.totalFolders },
                   { label: "Links", value: stats.links },
                   { label: "Favs", value: stats.favorites },
                 ].map((s) => (
-                  <div key={s.label} className="min-w-[68px] rounded-md px-3 py-3 bg-card/80 backdrop-blur-xl border border-border/50 text-center hover:border-primary/40 transition-colors">
+                  <div key={s.label} className="sm:min-w-[76px] rounded-xl px-3 py-3 bg-card/80 backdrop-blur-xl border border-border/50 text-center hover:border-primary/40 transition-colors">
                     <div className="font-serif-display text-2xl md:text-3xl tabular-nums text-gradient leading-none">{s.value}</div>
                     <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mt-2">{s.label}</div>
                   </div>
@@ -217,7 +221,7 @@ const Dashboard = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">{selectedFolder.name}</h1>
+              <h1 className="font-serif-display text-3xl tracking-tight leading-none">{selectedFolder.name}</h1>
               <nav className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                 <button onClick={() => setSelectedFolder(null)} className="hover:text-foreground transition-colors">Home</button>
                 {breadcrumb.map((folder, i) => (
@@ -263,8 +267,9 @@ const Dashboard = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="space-y-8">
+            <StatTilesSkeleton />
+            <CardGridSkeleton count={8} columns={gridClass} />
           </div>
         ) : (
           <AnimatePresence mode="wait">
@@ -321,6 +326,7 @@ const Dashboard = () => {
                           isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                           onDelete={(id) => setDeleteDialog({ type: "item", id })}
                           onMoveToFolder={handleMoveToFolder} onEdit={handleEditItem} folders={folders}
+                          onOpenDetail={(id) => { const found = items.find(i => i.id === id); if (found) setDetailItem(found); }}
                           onToggleFavorite={handleToggleFavorite} onMarkRead={handleMarkRead}
                         />
                       ))}
@@ -329,19 +335,22 @@ const Dashboard = () => {
                 )}
 
                 {rootFolders.length === 0 && unfolderedItems.length === 0 && !showFilteredResults && (
-                  <div className="text-center py-24">
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-primary/10 flex items-center justify-center">
-                      <Database className="w-10 h-10 text-primary/60" />
-                    </div>
-                    <h2 className="text-2xl font-bold mb-2">🎉 Welcome to Info Trunk!</h2>
-                    <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                      Start by creating your first folder, then add links, images, videos, or notes.
-                    </p>
-                    <div className="flex items-center justify-center gap-3">
-                      <CreateFolderDialog folders={folders} />
-                      <AddItemDialog folders={folders} />
-                    </div>
-                  </div>
+                  <EmptyState
+                    icon={Database}
+                    kicker="First Entry"
+                    title="Your vault is waiting"
+                    description="Create a folder to shape your library, then start filing links, images, videos and notes."
+                    action={<><CreateFolderDialog folders={folders} /><AddItemDialog folders={folders} /></>}
+                  />
+                )}
+
+                {showFilteredResults && filteredItems.length === 0 && (
+                  <EmptyState
+                    icon={Database}
+                    kicker="No matches"
+                    title="Nothing matches that search"
+                    description="Adjust your filters or try a different term to widen the results."
+                  />
                 )}
               </motion.div>
             ) : (
@@ -376,19 +385,19 @@ const Dashboard = () => {
                         isLocked={item.is_locked} saveReason={item.save_reason} isRead={item.is_read}
                         onDelete={(id) => setDeleteDialog({ type: "item", id })}
                         onMoveToFolder={handleMoveToFolder} onEdit={handleEditItem} folders={folders}
+                          onOpenDetail={(id) => { const found = items.find(i => i.id === id); if (found) setDetailItem(found); }}
                         onToggleFavorite={handleToggleFavorite} onMarkRead={handleMarkRead}
                       />
                     ))}
                   </div>
                 ) : subfolders.length === 0 ? (
-                  <div className="text-center py-24">
-                    <FolderOpen className="w-14 h-14 mx-auto mb-4 opacity-40" style={{ color: selectedFolder.color }} />
-                    <h2 className="text-xl font-semibold mb-2 text-muted-foreground">This folder is empty</h2>
-                    <div className="flex items-center justify-center gap-3 mt-6">
-                      <CreateFolderDialog folders={folders} defaultParentId={selectedFolder.id} />
-                      <AddItemDialog folders={folders} defaultFolderId={selectedFolder.id} />
-                    </div>
-                  </div>
+                  <EmptyState
+                    icon={FolderOpen}
+                    kicker={selectedFolder.name}
+                    title="This folder is empty"
+                    description="Add a subfolder or file your first item into this folder."
+                    action={<><CreateFolderDialog folders={folders} defaultParentId={selectedFolder.id} /><AddItemDialog folders={folders} defaultFolderId={selectedFolder.id} /></>}
+                  />
                 ) : null}
               </motion.div>
             )}
@@ -397,6 +406,13 @@ const Dashboard = () => {
       </div>
 
       <EditItemDialog item={editItem} open={!!editItem} onOpenChange={(open) => !open && setEditItem(null)} folders={folders} />
+      <ItemDetailModal
+        item={detailItem} folders={folders} open={!!detailItem}
+        onOpenChange={(open) => !open && setDetailItem(null)}
+        onEdit={handleEditItem}
+        onDelete={(id) => setDeleteDialog({ type: "item", id })}
+        onToggleFavorite={handleToggleFavorite}
+      />
 
       <AlertDialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
         <AlertDialogContent>

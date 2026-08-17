@@ -58,6 +58,7 @@ interface ItemCardProps {
   onDelete: (id: string) => void;
   onMoveToFolder?: (itemId: string, folderId: string | null) => void;
   onEdit?: (id: string) => void;
+  onOpenDetail?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   onMarkRead?: (id: string) => void;
   onSnooze?: (id: string, duration: string) => void;
@@ -92,6 +93,7 @@ const ItemCard = ({
   onDelete,
   onMoveToFolder,
   onEdit,
+  onOpenDetail,
   onToggleFavorite,
   onMarkRead,
   onSnooze,
@@ -646,6 +648,12 @@ const ItemCard = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {onOpenDetail && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onOpenDetail(id); }}>
+                        <Maximize2 className="w-4 h-4 mr-2" />
+                        View Details
+                      </DropdownMenuItem>
+                    )}
                     {onToggleFavorite && (
                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onToggleFavorite(id); }}>
                         <Star className={`w-4 h-4 mr-2 ${isFavorite ? "fill-amber-500 text-amber-500" : ""}`} />
@@ -766,7 +774,12 @@ const ItemCard = ({
               </div>
             </div>
 
-            <h3 className="font-semibold mb-1 line-clamp-2">{title}</h3>
+            <h3
+              className={`font-semibold mb-1 line-clamp-2 ${onOpenDetail ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+              onClick={onOpenDetail ? (e) => { e.stopPropagation(); onOpenDetail(id); } : undefined}
+            >
+              {title}
+            </h3>
             
             {description && (
               <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{description}</p>
