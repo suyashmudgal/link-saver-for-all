@@ -3,6 +3,7 @@ import { BarChart3, Link2, Star, FolderOpen, TrendingUp, Tag, Calendar, AlertTri
 import { Card } from "@/components/ui/card";
 import { useItems, useFolders } from "@/hooks/use-items";
 import DashboardLayout from "@/components/DashboardLayout";
+import { PageHeaderSkeleton, StatTilesSkeleton, ChartSkeleton } from "@/components/PageSkeletons";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ const chartConfig: ChartConfig = {
 };
 
 const Insights = () => {
-  const { data: items = [] } = useItems();
+  const { data: items = [], isLoading } = useItems();
   const { data: folders = [] } = useFolders();
 
   const stats = useMemo(() => {
@@ -103,6 +104,17 @@ const Insights = () => {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {isLoading ? (
+          <>
+            <PageHeaderSkeleton />
+            <div className="mb-8"><StatTilesSkeleton /></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ChartSkeleton />
+              <ChartSkeleton />
+            </div>
+          </>
+        ) : (
+        <>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <span className="w-8 gold-divider" />
@@ -295,6 +307,8 @@ const Insights = () => {
             )}
           </Card>
         </div>
+        </>
+        )}
       </div>
     </DashboardLayout>
   );

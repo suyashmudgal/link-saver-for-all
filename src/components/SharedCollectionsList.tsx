@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Copy, Trash2, ExternalLink, Share2, Check } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
+import { ListRowsSkeleton } from "@/components/PageSkeletons";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -25,26 +27,16 @@ const SharedCollectionsList = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[1, 2].map((i) => (
-          <Card key={i} className="p-4 animate-pulse">
-            <div className="h-5 bg-muted rounded w-1/3 mb-2" />
-            <div className="h-4 bg-muted rounded w-1/2" />
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  if (isLoading) return <ListRowsSkeleton count={3} />;
 
   if (collections.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Share2 className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-        <p className="text-muted-foreground">No shared collections yet.</p>
-        <p className="text-sm text-muted-foreground/60 mt-1">Create one from the Dashboard to share your links publicly.</p>
-      </div>
+      <EmptyState
+        icon={Share2}
+        kicker="Published"
+        title="No shared collections yet"
+        description="Share a folder or a single item from the dashboard and the public link will be listed here."
+      />
     );
   }
 

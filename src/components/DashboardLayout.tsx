@@ -1,5 +1,7 @@
 import { ReactNode, lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -12,6 +14,7 @@ interface DashboardLayoutProps { children: ReactNode; }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -39,7 +42,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 overflow-auto mesh-gradient">{children}</main>
+          <main className="flex-1 overflow-auto mesh-gradient">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </main>
         </div>
       </div>
     </SidebarProvider>

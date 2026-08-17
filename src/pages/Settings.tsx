@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/DashboardLayout";
+import { PageHeaderSkeleton, FormSkeleton } from "@/components/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -81,8 +82,9 @@ const Settings = () => {
   if (authLoading || loadingProfile) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+          <PageHeaderSkeleton />
+          <FormSkeleton />
         </div>
       </DashboardLayout>
     );
